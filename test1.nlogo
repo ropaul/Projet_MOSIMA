@@ -8,92 +8,197 @@ breed[matchings matching]
 
 ; atribut des persons (la position est récuperable par des fonction de netlogo)
 persons-own[
-  haveJobs
-  skill1
-  skill2
-  skill3
-  skill4
-  skill5
+  haveJob
+  skills
   salary
+  employer
 ]
 
 ; 
 ; atribut des compagnies (la position est récuperable par des fonction de netlogo)
 compagnies-own[
   haveEmployee
-  skill1
-  skill2
-  skill3
-  skill4
-  skill5
+  skills
   salary
+  employee
 ]
 
+globals[
+ salaryMean
+ salaryMax
+ salaryMaxFluctu 
+ n_skills
+ n_match
+ exceptional_mathing
+ unexpected_company_motivation
+ unexpected_worker_motivation
+ unexpected_firing
+ firing_quality_threshold
+ max_productivity_fluctuation
+ distMax
+]
 
-;matchings-own [
-;   seekC array  
-;   seekP array
+matchings-own [
+   seekC   
+   seekP 
+]
 
+;; =================================================================
+;; SETUP PROCEDURES
+;; =================================================================
+   
 to setup
   clear-all
+  
+  setup_globals
+  setup_persons
+  setup_companies
+  setup_matching
+  
+  reset-ticks
+end 
+
+to setup_persons  
   set-default-shape persons "person"
-  create-persons Person_Number  ;; création des persons
+  create-persons Person_Number  ;; création des agents PERSON
   [ set color white
     set size 1.5 
     setxy random-xcor random-ycor
-    set salary 1000 + random ( 5000) ;; A MODIFIER mettre surment un paramètre max salaire 
+    set haveJob 0
+    set employer nobody 
+    setup_skills
+    setup_salary 
   ]
-  set-default-shape  compagnies "person"
+end
+
+to setup_companies  
+  set-default-shape  compagnies "house"
   create-compagnies Compagny_Number
   [ set color grey
     set size 1.5
     setxy random-xcor random-ycor
-    set salary 1000 + random ( 5000) ;; A MODIFIER mettre surment un paramètre max salaire 
+    set haveEmployee 0
+    set employee nobody
+    setup_skills
+    setup_salary 
   ]
-  set-default-shape  matchings "person"
+end
+
+to setup_matching
+  set-default-shape  matchings "wheel"
   create-matchings 1
   [ set color orange
-    set size 1.
+    set size 2.
+    setxy 0 0
+    set seekP []
+    set seekC []
     ]
-  
-end 
+end
 
 
-to start
+
+;; =================================================================
+;; GO PROCEDURES
+;; =================================================================
+
+to go
   
   ask persons[
-    if haveJobs = false [
-      person-seek-job
-    ]
+    go_person
   ]
   ask compagnies[
-    if haveEmployee = false[
-      compagny-seek-employee
+    go_company
+  ]
+  
+ ; ask matchings [
+ ;   go_matching
+ ; ]
+  
+  tick
+end
+
+to go_person
+  if not haveJob [
+   ask matching 0 [
+     set seekP lput seekP ([who] of myself)
+   ] 
+  ]
+end
+
+to go_company
+  ifelse not haveEmployee [
+    ask matching 0 [
+      set seekC lput seekC ([who] of myself)
     ]
   ]
-  
-  ask matchings [
-    match
+  [
+    let bad_productivity (productivity skills ([skills] of employee)) 
+    let bad_luck (random-float 1 < unexpected_firing)
+    if (bad_productivity or bad_luck) [
+      fire_employee(employee)
+    ]
   ]
-  
-  
+end
+
+;; =================================================================
+;; DYNAMICS PROCEDURES
+;; =================================================================
+
+to-report productivity [skills1 skills2]
+  let basic_productivity (skillSimilarity skills1 skills2)
+  let luck ((random-float (2 * max_productivity_fluctuation)) - max_productivity_fluctuation)
+  report (basic_productivity + luck)
+end
+
+to fire_employee [the_employee]
+  set haveEmployee 0
+  set employee nobody
+  ask the_employee [    
+    set haveJob 0
+    set employer nobody
+    ]
 end
 
 
+;; =================================================================
+;; SIMILARITY PROCEDURES
+;; =================================================================
 
-to person-seek-job
-  
+
+to-report skillSimilarity [skills1 skills2]
+  let accu 0
+  foreach (n-values n_skills [?]) [
+   let skill_of_1 (item ? skills1) 
+   let skill_of_2 (item ? skills1)
+   if (skill_of_1 = skill_of_2) [
+    set accu (accu + 1) 
+   ]
+  ]  
+  report (accu / n_skills)
 end
 
-to compagny-seek-employee
-  
+
+;; =================================================================
+;; MISCELLAENOUS VARIABLES SETTINGS
+;; =================================================================
+
+to setup_globals
+  set salaryMax ( salaryMean + salaryMaxFluctu)
+  set distMax (world-width * world-width +  world-height *  world-height )
 end
 
-
-
-to match
-
+to setup_skills
+  set skills array:from-list n-values n_skills [0]
+  foreach (n-values n_skills [?]) [
+    array:set skills ? (random 2) 
+  ]
 end
+
+to setup_salary
+  let random_variation (random salaryMaxFluctu)
+  set salary (salaryMean + random_variation)
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 212
@@ -175,7 +280,7 @@ BUTTON
 165
 158
 NIL
-start
+go
 T
 1
 T
@@ -184,7 +289,7 @@ NIL
 NIL
 NIL
 NIL
-1
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
