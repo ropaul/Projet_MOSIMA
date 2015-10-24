@@ -15,6 +15,8 @@ persons-own[
   skill4
   skill5
   salary
+  meanMatching ; to calculate for the matching
+  Employee ; say who is his employee
 ]
 
 ; 
@@ -27,6 +29,8 @@ compagnies-own[
   skill4
   skill5
   salary
+  meanMatching ; to calculate for the matching
+  ; entreprise ; say which entreprise he work
 ]
 
 
@@ -61,16 +65,22 @@ end
 
 to start
   
-  ask persons[
-    if haveJobs = false [
-      person-seek-job
-    ]
-  ]
+  ; faire pour toutes les compagnies
   ask compagnies[
-    if haveEmployee = false[
+    if haveEmployee[  ;si a un employé , l'évaluer
+      evaluate-employee
+    ]
+    if haveEmployee = false [ ; si l'employé virer à ce tour, on cherche directement un autre (pas de ifelse)
       compagny-seek-employee
     ]
   ]
+  
+  ask persons[
+    if haveJobs = false [ ;si n'a pas d'emploi , cherche un
+      person-seek-job
+    ]
+  ]
+  
   
   ask matchings [
     match
@@ -80,8 +90,13 @@ to start
 end
 
 
+to evaluate-employee
+  
+end
+
 
 to person-seek-job
+ 
   
 end
 
@@ -92,7 +107,39 @@ end
 
 
 to match
+  
+  ask compagnies[
+    let best  0
+    let meanT  0
+    let meanC  0
+    let meanP  0
+    if haveEmployee = false [
+      compute-mean-compagny
+      set meanC  meanMatching
+      ask persons[
+        compute-mean-person
+        if meanMatching > meanP[
+          if (abs(meanMatching - meanC) <= execptionalMatchin [
+               set best own 
+        ]
+        
+      ]   
+      
+    ] 
+  ]
+  
+end
 
+
+
+
+to compute-mean-compagny
+   set meanMatching skill2 + skill2 + skill3 + skill4 + skill5
+end
+  
+  
+to compute-mean-person
+    set meanMatching skill2 + skill2 + skill3 + skill4 + skill5
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -185,6 +232,96 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+20
+187
+192
+220
+execptionalMatching
+execptionalMatching
+0
+10
+3
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+20
+226
+192
+259
+matchingQuality
+matchingQuality
+0
+10
+3
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+22
+285
+194
+318
+unexpectedFired
+unexpectedFired
+0
+100
+10
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+21
+326
+195
+359
+productivityFluctuation
+productivityFluctuation
+0
+100
+30
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+15
+370
+197
+403
+unexpetedCompagnyMotivation
+unexpetedCompagnyMotivation
+0
+100
+50
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+13
+415
+197
+448
+unexpetedworkerMotivation
+unexpetedworkerMotivation
+0
+100
+50
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
