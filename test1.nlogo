@@ -1,7 +1,7 @@
 extensions [array table]
 
 breed[persons person]
-breed[compagnies compagny]
+breed[companies company]
 breed[matchings matching]
 
 
@@ -14,9 +14,9 @@ persons-own[
   employer
 ]
 
-; 
+
 ; atribut des compagnies (la position est récuperable par des fonction de netlogo)
-compagnies-own[
+companies-own[
   haveEmployee
   skills
   salary
@@ -24,18 +24,21 @@ compagnies-own[
 ]
 
 globals[
- salaryMean
+ ;salaryMean ;; SLIDER
  salaryMax
- salaryMaxFluctu 
- n_skills
- n_match
- exceptional_mathing
- unexpected_company_motivation
- unexpected_worker_motivation
- unexpected_firing
- firing_quality_threshold
- max_productivity_fluctuation
+ ;salaryMaxFluctu ;; SLIDER
+ ;n_skills ;; SLIDER
+ ;n_match ;; SLIDER
+ ;matching_quality_threshold ;; SLIDER
+ ;exceptional_matching ;; SLIDER
+ ;unexpected_company_motivation ;; SLIDER
+ ;unexpected_worker_motivation ;; SLIDER
+ ;unexpected_firing ;; SLIDER
+ ;firing_quality_threshold ;; SLIDER
+ ;max_productivity_fluctuation ;; SLIDER
  distMax
+ matchingAgentWhoNumber
+ ;Rseed ;; INPUT
 ]
 
 matchings-own [
@@ -50,6 +53,7 @@ matchings-own [
 to setup
   clear-all
   
+  random-seed Rseed
   setup_globals
   setup_persons
   setup_companies
@@ -64,7 +68,7 @@ to setup_persons
   [ set color white
     set size 1.5 
     setxy random-xcor random-ycor
-    set haveJob 0
+    set haveJob False
     set employer nobody 
     setup_skills
     setup_salary 
@@ -72,12 +76,12 @@ to setup_persons
 end
 
 to setup_companies  
-  set-default-shape  compagnies "house"
-  create-compagnies Compagny_Number
+  set-default-shape  companies "house"
+  create-companies Compagny_Number
   [ set color grey
     set size 1.5
     setxy random-xcor random-ycor
-    set haveEmployee 0
+    set haveEmployee False
     set employee nobody
     setup_skills
     setup_salary 
@@ -92,6 +96,7 @@ to setup_matching
     setxy 0 0
     set seekP []
     set seekC []
+    set matchingAgentWhoNumber who
     ]
 end
 
@@ -106,38 +111,63 @@ to go
   ask persons[
     go_person
   ]
-  ask compagnies[
+  ask companies[
     go_company
   ]
   
- ; ask matchings [
- ;   go_matching
- ; ]
+  ask matchings [
+    go_matching
+  ]
   
   tick
 end
 
 to go_person
   if not haveJob [
-   ask matching 0 [
-     set seekP lput seekP ([who] of myself)
+   ask matching matchingAgentWhoNumber [
+     if not member? ([who] of myself) seekP [
+       set seekP lput ([who] of myself) seekP 
+     ]
    ] 
   ]
 end
 
 to go_company
   ifelse not haveEmployee [
-    ask matching 0 [
-      set seekC lput seekC ([who] of myself)
+    ask matching matchingAgentWhoNumber [
+     if not member? ([who] of myself) seekC [
+       set seekC lput ([who] of myself) seekC 
+     ]
     ]
   ]
   [
-    let bad_productivity (productivity skills ([skills] of employee)) 
+    let bad_productivity ((productivity skills ([skills] of employee)) < firing_quality_threshold)
     let bad_luck (random-float 1 < unexpected_firing)
     if (bad_productivity or bad_luck) [
       fire_employee(employee)
     ]
   ]
+end
+
+to go_matching
+  let n_treated (min (List (length seekP) (length seekC) n_match))
+  let unemployed_treated n-of n_treated (shuffle seekP)
+  let recruitors_treated n-of n_treated (shuffle seekC)
+  foreach (n-values n_treated [?])[
+    let a_person_number (item ? unemployed_treated)
+    let a_company_number (item ? recruitors_treated)
+    let a_person (person a_person_number)
+    let a_company (company a_company_number)
+    let simi_person (similarity_person_to_company a_person a_company)
+    let simi_company (similarity_company_to_person a_company a_person)
+    let close_enough ((abs (simi_person - simi_company)) <= exceptional_matching)
+    let good_enough ( (simi_person + simi_company) / 2 >= matching_quality_threshold )
+    if (close_enough and good_enough) [
+      ask a_company [hire_employee a_person]
+      set seekP (remove-item (position a_person_number seekP) seekP)
+      set seekC (remove-item (position a_company_number seekC) seekC)
+    ]
+  ]  
 end
 
 ;; =================================================================
@@ -151,12 +181,21 @@ to-report productivity [skills1 skills2]
 end
 
 to fire_employee [the_employee]
-  set haveEmployee 0
+  set haveEmployee False
   set employee nobody
-  ask the_employee [    
-    set haveJob 0
+  ask the_employee [ 
+    set haveJob False
     set employer nobody
     ]
+end
+
+to hire_employee [the_person]
+  set haveEmployee True
+  set employee the_person
+  ask the_person [    
+    set haveJob True
+    set employer myself
+    ]  
 end
 
 
@@ -168,13 +207,42 @@ end
 to-report skillSimilarity [skills1 skills2]
   let accu 0
   foreach (n-values n_skills [?]) [
-   let skill_of_1 (item ? skills1) 
-   let skill_of_2 (item ? skills1)
+   let skill_of_1 (array:item skills1 ?) 
+   let skill_of_2 (array:item skills2 ?)
    if (skill_of_1 = skill_of_2) [
     set accu (accu + 1) 
    ]
   ]  
   report (accu / n_skills)
+end
+
+to-report localisationSimilarity [x1 y1 x2 y2]
+  let dist sqrt ((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
+  report 1. - dist / distMax
+end
+
+to-report salarySimilarity [salary1 salary2]
+  let diff (salary1 - salary2)
+  let temp (1. + diff / salaryMax)
+  report (temp / 2)
+end
+
+to-report similarity_person_to_company[a_person a_company]
+  let accu 0
+  set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company))
+  set accu (accu + localisationSimilarity ([xcor] of a_person) ([ycor] of a_person) ([xcor] of a_company) ([ycor] of a_company))
+  set accu (accu + salarySimilarity ([salary] of a_person) ([salary] of a_company))
+  let motivation (random-float unexpected_worker_motivation)
+  report ( (accu + motivation) / (3 + unexpected_worker_motivation) )
+end
+
+to-report similarity_company_to_person[a_company a_person]
+  let accu 0
+  set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company))
+  set accu (accu + localisationSimilarity ([xcor] of a_person) ([ycor] of a_person) ([xcor] of a_company) ([ycor] of a_company))
+  set accu (accu + salarySimilarity ([salary] of a_company) ([salary] of a_person))
+  let motivation (random-float unexpected_company_motivation)
+  report ( (accu + motivation) / (3 + unexpected_company_motivation) )
 end
 
 
@@ -198,12 +266,11 @@ to setup_salary
   let random_variation (random salaryMaxFluctu)
   set salary (salaryMean + random_variation)
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
-212
+238
 10
-651
+677
 470
 16
 16
@@ -221,8 +288,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -235,8 +302,8 @@ SLIDER
 Person_Number
 Person_Number
 0
-1000
-50
+100
+100
 1
 1
 NIL
@@ -250,8 +317,8 @@ SLIDER
 Compagny_Number
 Compagny_Number
 0
-1000
-50
+100
+100
 1
 1
 NIL
@@ -290,6 +357,203 @@ NIL
 NIL
 NIL
 0
+
+PLOT
+300
+499
+676
+673
+Stat1
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"Unemployed" 1.0 0 -13345367 true "" "plot count persons with [not haveJob]"
+"Vacant job" 1.0 0 -2674135 true "" "plot count companies with [not haveEmployee]"
+"seekC" 1.0 0 -7500403 true "" "plot 0;;length [seekC] of matching matchingAgentWhoNumber"
+"seekP" 1.0 0 -955883 true "" "plot 0;;length [seekP] of matching matchingAgentWhoNumber"
+
+SLIDER
+11
+268
+183
+301
+salaryMean
+salaryMean
+0
+100
+50
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+301
+182
+334
+salaryMaxFluctu
+salaryMaxFluctu
+0
+100
+10
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+226
+182
+259
+n_skills
+n_skills
+1
+10
+5
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+9
+480
+181
+513
+n_match
+n_match
+0
+100
+7
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+8
+521
+262
+554
+matching_quality_threshold
+matching_quality_threshold
+0
+1
+0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+8
+553
+262
+586
+exceptional_matching
+exceptional_matching
+0
+1
+0.3
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+9
+638
+258
+671
+unexpected_company_motivation
+unexpected_company_motivation
+0
+1
+0.1
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+604
+258
+637
+unexpected_worker_motivation
+unexpected_worker_motivation
+0
+1
+0.1
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+11
+417
+234
+450
+unexpected_firing
+unexpected_firing
+0
+1
+0.1
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+11
+351
+234
+384
+firing_quality_threshold
+firing_quality_threshold
+0
+1
+0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+11
+384
+234
+417
+max_productivity_fluctuation
+max_productivity_fluctuation
+0
+1
+0.3
+0.1
+1
+NIL
+HORIZONTAL
+
+INPUTBOX
+733
+49
+797
+109
+Rseed
+1
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
