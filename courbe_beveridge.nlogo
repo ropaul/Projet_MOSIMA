@@ -37,6 +37,8 @@ globals[
   structural_unemployement
   natural_unemployement
   count_unemployee_total
+  ;value_v
+  ;value_u
   
   
   
@@ -221,7 +223,7 @@ to go_globals
   set vacant_jobs count companies with[not haveEmployee]
   if labor_force != 0[set vacancy_rate (vacant_jobs / labor_force)] 
   if Person_Number != 0[set participation_rate ( labor_force / Person_Number)]
-  set natural_unemployement ( (frictional_unemployement / count_unemployee_total ) +( structural_unemployement / (ticks + 1)))
+   if count_unemployee_total != 0[set natural_unemployement ( (frictional_unemployement / count_unemployee_total ) +( structural_unemployement / (ticks + 1)))]
 end
      
 
@@ -352,6 +354,24 @@ to update_frictional_unemployment [time]
 end
 
 
+
+
+;; =================================================================
+;; FUNCTIONS TO HAVE THE BEVERIDGE PLOT
+;; =================================================================
+
+to SIMULATE
+  let value_v array:from-list n-values n_simulation [0]
+  let value_u array:from-list n-values n_simulation [0]
+  foreach (n-values n_simulation [?]) [
+    setup
+    while  [ticks < max_ticks]  [ go ]
+    array:set value_v ?  (vacancy_rate  * 100) 
+    array:set value_u ?  (unemployement_rate * 100)
+  ]
+  update-plots
+  
+end
 
 
 
@@ -495,7 +515,7 @@ salaryMaxFluctu
 salaryMaxFluctu
 0
 100
-0
+17
 1
 1
 NIL
@@ -540,7 +560,7 @@ matching_quality_threshold
 matching_quality_threshold
 0
 1
-0.7
+0.4
 0.1
 1
 NIL
@@ -555,7 +575,7 @@ exceptional_matching
 exceptional_matching
 0
 1
-0.2
+0.5
 0.1
 1
 NIL
@@ -600,7 +620,7 @@ unexpected_firing
 unexpected_firing
 0
 1
-0
+0.1
 0.1
 1
 NIL
@@ -615,7 +635,7 @@ firing_quality_threshold
 firing_quality_threshold
 0
 1
-0
+0.1
 0.1
 1
 NIL
@@ -630,7 +650,7 @@ max_productivity_fluctuation
 max_productivity_fluctuation
 0
 1
-1
+0.1
 0.1
 1
 NIL
@@ -654,7 +674,7 @@ SWITCH
 180
 linksVisible
 linksVisible
-1
+0
 1
 -1000
 
@@ -672,27 +692,26 @@ colorVisible
 PLOT
 851
 60
-1196
-297
+1293
+267
 rate
-NIL
+%
 %
 0.0
-100.0
+2.0
 0.0
-1.0
+2.0
 true
 true
 "" ""
 PENS
-"vacancy-rate" 1.0 0 -15390905 true "" "plot vacancy_rate"
-"unemployment_rate" 1.0 0 -3844592 true "" "plot unemployement_rate"
+"vacancy-rate / unemployment_rate" 1.0 0 -15390905 true "" "foreach(n-values n_simulation [?]) [plotxy random(50)  random(50) ];value_u ? value_v ? ]"
 
 MONITOR
-853
-312
-942
-357
+721
+424
+810
+469
 vacancy_rate
 vacancy_rate
 17
@@ -700,10 +719,10 @@ vacancy_rate
 11
 
 MONITOR
-949
-312
-1080
-357
+817
+424
+948
+469
 unemployement_rate
 unemployement_rate
 17
@@ -729,6 +748,53 @@ PENS
 "natural_unemployement" 1.0 0 -16777216 true "" "plot natural_unemployement"
 "structural_unemployement" 1.0 0 -11033397 true "" "plot structural_unemployement / (ticks + 1 )"
 "frictional_unemployement" 1.0 0 -2064490 true "" "if ( count_unemployee_total > 0) [plot (frictional_unemployement / count_unemployee_total)]"
+
+BUTTON
+704
+233
+792
+266
+NIL
+SIMULATE
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+677
+281
+849
+314
+n_simulation
+n_simulation
+0
+100
+10
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+676
+318
+848
+351
+max_ticks
+max_ticks
+50
+1000
+50
+50
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
