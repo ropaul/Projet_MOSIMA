@@ -37,8 +37,8 @@ globals[
   structural_unemployement
   natural_unemployement
   count_unemployee_total
-  ;value_v
-  ;value_u
+  tab_v
+  tab_u
   
   
   
@@ -329,6 +329,8 @@ to setup_globals
   set structural_unemployement 0
   set natural_unemployement 0
   set count_unemployee_total 0
+  ;set tab_v tab_v
+  ;set tab_u tab_u
 end
 
 to setup_skills
@@ -361,18 +363,43 @@ end
 ;; =================================================================
 
 to SIMULATE
-  let value_v array:from-list n-values n_simulation [0]
-  let value_u array:from-list n-values n_simulation [0]
+  let tab_vprime array:from-list n-values n_simulation [0]
+  let tab_uprime array:from-list n-values n_simulation [0]
+  let epsilon 0.5
+  set Person_Number 0
+  Set Compagny_Number 100
   foreach (n-values n_simulation [?]) [
+    set Person_Number (Person_Number + delta)
+    set Compagny_Number (Compagny_Number - delta)
     setup
-    while  [ticks < max_ticks]  [ go ]
-    array:set value_v ?  (vacancy_rate  * 100) 
-    array:set value_u ?  (unemployement_rate * 100)
+    let oldmeanV  1000
+    let newmeanV 0
+    let oldmeanU  1000
+    let newmeanU 0
+    while [ ticks > 10 or abs( (oldmeanV / (ticks + 1)) - (newmeanV / (ticks + 1))) > epsilon or abs( oldmeanU / (ticks + 1) - newmeanU / (ticks + 1) ) > epsilon]   
+    [
+     go
+     set oldmeanV newmeanV
+     set oldmeanU newmeanU
+     if (ticks = 1)
+     [
+      set newmeanV vacancy_rate
+      set newmeanU unemployement_rate
+     ]
+     if (ticks > 1)
+     [
+       set newmeanV (newmeanV + vacancy_rate) 
+       set newmeanU (newmeanU + unemployement_rate)
+       ]
+    ]  
+    array:set tab_vprime ?  (vacancy_rate  * 100) 
+    array:set tab_uprime ?  (unemployement_rate * 100)
   ]
+  set tab_v tab_vprime
+  set tab_u tab_uprime
   update-plots
   
 end
-
 
 
 
@@ -414,8 +441,8 @@ SLIDER
 Person_Number
 Person_Number
 0
-100
-100
+500
+5
 1
 1
 NIL
@@ -429,8 +456,8 @@ SLIDER
 Compagny_Number
 Compagny_Number
 0
-100
-100
+500
+95
 1
 1
 NIL
@@ -619,9 +646,9 @@ SLIDER
 unexpected_firing
 unexpected_firing
 0
-1
 0.1
-0.1
+0.012
+0.001
 1
 NIL
 HORIZONTAL
@@ -705,7 +732,7 @@ true
 true
 "" ""
 PENS
-"vacancy-rate / unemployment_rate" 1.0 0 -15390905 true "" "foreach(n-values n_simulation [?]) [plotxy random(50)  random(50) ];value_u ? value_v ? ]"
+"vacancy-rate / unemployment_rate" 1.0 0 -15390905 true "" "foreach(n-values n_simulation [?]) [plotxy tab_u ? tab_v ? ]; random(50)  random(50) ]"
 
 MONITOR
 721
@@ -786,12 +813,12 @@ SLIDER
 318
 848
 351
-max_ticks
-max_ticks
-50
-1000
-50
-50
+delta
+delta
+1
+20
+5
+1
 1
 NIL
 HORIZONTAL
