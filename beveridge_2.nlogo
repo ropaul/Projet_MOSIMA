@@ -1,437 +1,123 @@
-;__includes[""] ;Discomment it and press the "Check" button to get the "include" dropbar
+__includes["test1.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
 
-extensions [array table]
-
-breed[persons person]
-breed[companies company]
-breed[matchings matching]
-
-
-
-; attribut des persons (la position est récuperable par des fonction de netlogo)
-persons-own[
-  haveJob
-  skills
-  salary
-  employer
   
-  time_unemployed ;; to count the frictional_unemployement
-]
-
-
-; atribut des compagnies (la position est récuperable par des fonction de netlogo)
-companies-own[
-  haveEmployee
-  skills
-  salary
-  employee
-]
-
-globals[
-  ; Statistic variables :
-  labor_force
-  unemployment_level
-  unemployement_rate
-  vacant_jobs
-  vacancy_rate
-  participation_rate
-  frictional_unemployement_time
-  frictional_unemployement_rate
-  people_matched_this_turn
-  structural_unemployement
-  natural_unemployement
-  count_unemployed_total
-  
-  unemployement_rate_list
-  vacancy_rate_list 
- 
- time_window
- ; Multiple simulations variables
-  maxNumberPerson
-  minNumberPerson
-  stepNumberPerson
-  rangeNumberPerson
-  maxNumberCompanies
-  minNumberCompanies
-  stepNumberCompanies
-  rangeNumberCompanies
-  n_ticks_max
-  epsilon 
-  VacancyRateList_simulations
-  UnemployedRateList_simulations
-  
- salaryMean ;; SLIDER
- salaryMax
- salaryMaxFluctu ;; SLIDER
- n_skills ;; SLIDER
- n_match ;; SLIDER
- matching_quality_threshold ;; SLIDER
- exceptional_matching ;; SLIDER
- unexpected_company_motivation ;; SLIDER
- unexpected_worker_motivation ;; SLIDER
- unexpected_firing ;; SLIDER
- firing_quality_threshold ;; SLIDER
- max_productivity_fluctuation ;; SLIDER
- distMax
- matchingAgentWhoNumber
- 
- Person_Number
- Compagny_Number
- ;Rseed ;; INPUT
-]
-
-matchings-own [
-   seekC   
-   seekP 
-]
-
-;; =================================================================
-;; SETUP PROCEDURES
-;; =================================================================
-   
-to setup
+to setup_simulations
   clear-all
+  setup_globals_simulations
   
-  random-seed Rseed
+  setup_simulation (first rangeNumberPerson) (first rangeNumberCompanies)
+ 
+  reset-ticks
+end
+ 
+to setup_simulation [n_persons n_companies];; this replace the setup of the original simulation.
+  
+  random-seed Rseed 
   setup_globals
+  ; to over_write the values setted in setup_globals
+  set Person_Number n_persons 
+  set Compagny_Number n_companies   
+   
   setup_persons
-  setup_companies
+  setup_companies  
   setup_matching
-  
   reset-ticks
 end 
-
-to setup_persons  
-  set-default-shape persons "person"
-  create-persons Person_Number  ;; création des agents PERSON
-  [ set color white
-    set size 1.5 
-    setxy random-xcor random-ycor
-    set haveJob False
-    set employer nobody 
-    setup_skills
-    setup_salary 
-    set time_unemployed 0
-  ]
-end
-
-to setup_companies  
-  set-default-shape  companies "house"
-  create-companies Compagny_Number
-  [ set color grey
-    set size 1.5
-    setxy random-xcor random-ycor
-    set haveEmployee False
-    set employee nobody
-    setup_skills
-    setup_salary 
-  ]
-end
-
-to setup_matching
-  set-default-shape  matchings "target"
-  create-matchings 1
-  [ set color orange
-    set size 2.
-    setxy 0 0
-    set seekP []
-    set seekC []
-    set matchingAgentWhoNumber who
-    ]
-end
-
-
-
-
-;; =================================================================
-;; GO PROCEDURES
-;; =================================================================
-
-to go
-  
-  ask persons[
-    go_person
-  ]
-  ask companies[
-    go_company
-  ]
-  
-  ask matchings [
-    go_matching
-  ]
-  
-  go_links
-  go_color
-  go_globals
-  
-  tick
-end
-
-to go_person
-  if not haveJob [
-   ask matching matchingAgentWhoNumber [
-     if not member? ([who] of myself) seekP [
-       set seekP lput ([who] of myself) seekP 
-     ]  
-   ]
-     set time_unemployed time_unemployed + 1; ADD 1 to the time of unemployement
-  ]
-end
-
-to go_company
-  ifelse not haveEmployee [
-    ask matching matchingAgentWhoNumber [
-     if not member? ([who] of myself) seekC [
-       set seekC lput ([who] of myself) seekC 
-     ]
-    ]
-  ]
-  [
-    let bad_productivity ((productivity skills ([skills] of employee)) < firing_quality_threshold)
-    let bad_luck (random-float 1 < unexpected_firing)
-    if (bad_productivity or bad_luck) [
-      fire_employee(employee)
-    ]
-  ]
-end
-
-to go_matching
-  set people_matched_this_turn 0
-  set structural_unemployement 0
-  set frictional_unemployement_rate 0
-  set frictional_unemployement_time 0
-  let n_treated (min (List (length seekP) (length seekC) n_match))
-  let unemployed_treated n-of n_treated (shuffle seekP)
-  let recruitors_treated n-of n_treated (shuffle seekC)
-  foreach (n-values n_treated [?])[
-    let a_person_number (item ? unemployed_treated)
-    let a_company_number (item ? recruitors_treated)
-    let a_person (person a_person_number)
-    let a_company (company a_company_number)
-    let simi_person (similarity_person_to_company a_person a_company)
-    let simi_company (similarity_company_to_person a_company a_person)
-    let close_enough ((abs (simi_person - simi_company)) <= exceptional_matching)
-    let good_enough ( (simi_person + simi_company) / 2 >= matching_quality_threshold )
-    ifelse (close_enough and good_enough) [
-      ask a_company [hire_employee a_person]
-      set seekP (remove-item (position a_person_number seekP) seekP)
-      set seekC (remove-item (position a_company_number seekC) seekC)
-    ]
-    [
-      set structural_unemployement structural_unemployement + 1  ; UPDATE OF STRCUTURAL UNEMPLOYEMENT HERE  
-    ]
-  ]
-end
-
-
-to go_links
-  if linksVisible [
-    ask links [ set color white]
-  ]
-  if linksVIsible = false [
-    ask links [ set color black]
-  ]
-end
-
-to go_color
-  if colorVisible = false [
-    ask companies [set color grey]
-    ask persons [set color white]
-  ]
-end
-
-
-to go_globals
-  let working_force count persons with [haveJob]
-  set unemployment_level count persons with [not haveJob] 
-  set labor_force (working_force + unemployment_level)
-  if labor_force != 0[
-    set unemployement_rate ( unemployment_level /   labor_force)
-    ]
-  set vacant_jobs count companies with [not haveEmployee]
-  if labor_force != 0 [
-    set vacancy_rate (vacant_jobs / labor_force)
+ 
+ 
+to go_simulations 
+  let index 1
+  foreach (n-values (length rangeNumberCompanies) [?])[ 
+    let n_companies (item ? rangeNumberCompanies)
+    foreach (n-values (length rangeNumberPerson) [?])[
+      let n_person (item ? rangeNumberPerson)
+            
+      setup_simulation n_person n_companies
+      print "===================================================================="   
+      print (word "Number of companies for the simulation: " Compagny_Number)
+      print (word "Number of persons for the simulation:" Person_Number)
+       
+      while [ticks < n_ticks_max and not hasConverged] [
+        go  
+        if stop_simulations [
+          stop
+        ]
+      ]
+      ask turtles [die]
+      let vac_rate (mean vacancy_rate_list)
+      let unem_rate (mean unemployement_rate_list)
+      set VacancyRateList_simulations lput vac_rate VacancyRateList_simulations
+      set UnemployedRateList_simulations lput unem_rate UnemployedRateList_simulations
+      print (word "Simulation " index " over " (length rangeNumberCompanies * length rangeNumberPerson) " ended with:")
+      print (word "--- a vacancy rate of: " vac_rate " and an unemployed rate of: " unem_rate)
+      set index (index + 1)
     ] 
-  if Person_Number != 0 [
-    set participation_rate ( labor_force / Person_Number)
-    ]
-  set natural_unemployement ( frictional_unemployement_rate  + structural_unemployement)
-  
-  ifelse ticks < time_window [
-    set unemployement_rate_list lput unemployement_rate unemployement_rate_list
-    set vacancy_rate_list lput vacancy_rate vacancy_rate_list
+  ] 
+end
+ 
+to-report hasConverged 
+  ifelse (ticks > time_window)   
+  [
+    let vac_mean mean vacancy_rate_list
+    let unemp_mean mean unemployement_rate_list
+    let canConverge True
+    let index 0
+    while [canConverge and index < time_window]
+    [
+      let conv_vac ((abs (item index vacancy_rate_list) - vac_mean) < epsilon)
+      let conv_unemp ((abs (item index unemployement_rate_list) - unemp_mean) < epsilon)
+      set canConverge (conv_vac and conv_unemp)
+      set index (index + 1)
+    ] 
+    report canConverge
   ]
   [
-    set unemployement_rate_list lput unemployement_rate but-first unemployement_rate_list
-    set vacancy_rate_list lput vacancy_rate but-first  vacancy_rate_list
+    report False
+  ]    
+end
+
+to setup_globals_simulations
+  
+  set maxNumberPerson max List maxNumberPerson_ minNumberPerson_
+  set minNumberPerson min List maxNumberPerson_ minNumberPerson_
+  set stepNumberPerson stepNumberPerson_
+  set maxNumberCompanies max List maxNumberCompanies_ minNumberCompanies_
+  set minNumberCompanies min List maxNumberCompanies_ minNumberCompanies_
+  set stepNumberCompanies stepNumberCompanies_ 
+  set n_ticks_max n_ticks_max_
+  set epsilon epsilon_ 
+  
+  set rangeNumberPerson []
+  set rangeNumberCompanies [] 
+  
+  set VacancyRateList_simulations []
+  set UnemployedRateList_simulations []
+  
+  let n_NumberPerson ((maxNumberPerson - minNumberPerson) / stepNumberPerson)
+  foreach (n-values n_NumberPerson [?])[
+    set rangeNumberPerson lput (minNumberPerson + ? * stepNumberPerson) rangeNumberPerson
   ]
-end
-     
-
-;; =================================================================
-;; DYNAMICS PROCEDURES
-;; =================================================================
-
-to-report productivity [skills1 skills2]
-  let basic_productivity (skillSimilarity skills1 skills2)
-  let luck ((random-float (2 * max_productivity_fluctuation)) - max_productivity_fluctuation)
-  report (basic_productivity + luck)
+  let n_NumberCompanies ((maxNumberCompanies - minNumberCompanies) / stepNumberCompanies)
+  foreach (n-values n_NumberCompanies [?])[
+    set rangeNumberCompanies lput (minNumberCompanies + ? * stepNumberCompanies) rangeNumberCompanies
+  ]
+  
 end
 
-to fire_employee [the_employee]
-  set haveEmployee False
-  set employee nobody
-  set color grey   ; HERE CHANGE OF COLOR
-  ask the_employee [ 
-    set haveJob False
-    set employer nobody
-    set color white     ; HERE CHANGE OF COLOR
-    ask my-links [die]  ; HERE TO DESTROY A LINK BETWEEN COMPAGY AND PERSON
+ 
+to plot_beveridge
+  if (VacancyRateList_simulations != 0 and UnemployedRateList_simulations != 0) [
+    if (length VacancyRateList_simulations > 0 and length UnemployedRateList_simulations > 0) [
+      plotxy (last UnemployedRateList_simulations) (last VacancyRateList_simulations) 
     ]
-end
-
-to hire_employee [the_person]
-  
-  set people_matched_this_turn (people_matched_this_turn + 1)
-  set haveEmployee True
-  set employee the_person
-  if colorVisible [set color green]   ; HERE CHANGE OF COLOR
-  ask the_person [    
-    set haveJob True
-    update_frictional_unemployment time_unemployed 
-    set time_unemployed 0 ; TO CALCUL THE FRICTIONAL UNEMPLOYEMENT
-    if colorVisible [set color blue ] ; HERE CHANGE OF COLOR
-    set employer myself
-    create-link-with myself ; HERE TO CREATE A LINK BETWEEN COMPAGY AND PERSON
-    ]  
-end
-
-
-;; =================================================================
-;; SIMILARITY PROCEDURES
-;; =================================================================
-
-
-to-report skillSimilarity [skills1 skills2]
-  let accu 0
-  foreach (n-values n_skills [?]) [
-   let skill_of_1 (array:item skills1 ?) 
-   let skill_of_2 (array:item skills2 ?)
-   if (skill_of_1 = skill_of_2) [
-    set accu (accu + 1) 
-   ]
-  ]  
-  report (accu / n_skills)
+  ]
 end 
-
-to-report localisationSimilarity [x1 y1 x2 y2]
-  let dist sqrt ((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
-  report 1. - dist / distMax
-end
-
-to-report salarySimilarity [salary1 salary2]
-  let diff (salary1 - salary2)
-  let temp (1. + diff / salaryMax)
-  report (temp / 2)
-end
-
-to-report similarity_person_to_company[a_person a_company]
-  let accu 0
-  set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company))
-  set accu (accu + localisationSimilarity ([xcor] of a_person) ([ycor] of a_person) ([xcor] of a_company) ([ycor] of a_company))
-  set accu (accu + salarySimilarity ([salary] of a_person) ([salary] of a_company))
-  let motivation (random-float unexpected_worker_motivation)
-  report ( (accu + motivation) / (3 + unexpected_worker_motivation) )
-end
-
-to-report similarity_company_to_person[a_company a_person]
-  let accu 0
-  set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company))
-  set accu (accu + localisationSimilarity ([xcor] of a_person) ([ycor] of a_person) ([xcor] of a_company) ([ycor] of a_company))
-  set accu (accu + salarySimilarity ([salary] of a_company) ([salary] of a_person))
-  let motivation (random-float unexpected_company_motivation)
-  report ( (accu + motivation) / (3 + unexpected_company_motivation) )
-end
-
-
-;; =================================================================
-;; MISCELLAENOUS VARIABLES SETTINGS
-;; =================================================================
-
-to setup_globals 
-  ;; let's get sliders' values
- set time_window time_window_;; SLIDER
- set salaryMean salaryMean_;; SLIDER  
- set salaryMaxFluctu salaryMaxFluctu_ ;; SLIDER
- set n_skills n_skills_;; SLIDER
- set n_match n_match_ ;; SLIDER
- set matching_quality_threshold matching_quality_threshold_ ;; SLIDER
- set exceptional_matching exceptional_matching_ ;; SLIDER
- set unexpected_company_motivation unexpected_company_motivation_ ;; SLIDER
- set unexpected_worker_motivation unexpected_worker_motivation_ ;; SLIDER
- set unexpected_firing  unexpected_firing_ ;; SLIDER
- set firing_quality_threshold firing_quality_threshold_ ;; SLIDER
- set max_productivity_fluctuation max_productivity_fluctuation_ ;; SLIDER 
- set Person_Number Person_Number_;; SLIDER
- set Compagny_Number Compagny_Number_;; SLIDER
- 
- 
-  set salaryMax ( salaryMean + salaryMaxFluctu)
-  set distMax (world-width * world-width +  world-height *  world-height )
-  
-  set labor_force (count persons with [not haveJob] + count persons with [haveJob])
-  set unemployment_level count persons with [not haveJob] 
-   if Person_Number != 0[set unemployement_rate (unemployment_level /   Person_Number)]
-  set vacant_jobs count companies with[not haveEmployee]
-  if labor_force != 0[set vacancy_rate (vacant_jobs / labor_force)] 
-  if Person_Number != 0[set participation_rate ( labor_force / Person_Number)]
-  set frictional_unemployement_time 0
-  set frictional_unemployement_rate 0
-  set structural_unemployement 0
-  set natural_unemployement 0
-  set count_unemployed_total 0
-  set people_matched_this_turn 0
- 
-  set unemployement_rate_list []
-  set vacancy_rate_list []
-end
-
-to setup_skills
-  set skills array:from-list n-values n_skills [0]
-  foreach (n-values n_skills [?]) [
-    array:set skills ? (random 2) 
-  ]
-end
-
-to setup_salary
-  let random_variation (random salaryMaxFluctu)
-  set salary (salaryMean + random_variation)
-end
-
-
-;; =================================================================
-;; STATISTICS FUNCTIONS
-;; =================================================================
-
-to update_frictional_unemployment [time]
-  set frictional_unemployement_time (frictional_unemployement_time + time)
-  if people_matched_this_turn != 0 [
-    set frictional_unemployement_rate (frictional_unemployement_time / people_matched_this_turn)
-  ]
-end
-
-
-
-
-
-
-
 @#$#@#$#@
 GRAPHICS-WINDOW
-240
-12
-679
-472
+250
+10
+689
+470
 16
 16
 13.0
@@ -455,25 +141,10 @@ ticks
 30.0
 
 SLIDER
-23
-32
-229
-65
-Person_Number_
-Person_Number_
-0
-500
-500
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-23
-78
-235
-111
+840
+310
+932
+343
 Compagny_Number_
 Compagny_Number_
 0
@@ -485,12 +156,12 @@ NIL
 HORIZONTAL
 
 BUTTON
-24
-125
-87
-158
+28
+133
+190
+166
 NIL
-setup
+setup_simulations
 NIL
 1
 T
@@ -502,13 +173,13 @@ NIL
 1
 
 BUTTON
-102
-125
-165
-158
+29
+175
+190
+208
 NIL
-go
-T
+go_simulations
+NIL
 1
 T
 OBSERVER
@@ -519,10 +190,10 @@ NIL
 0
 
 PLOT
-300
-499
-676
-673
+320
+545
+696
+674
 Stat1
 NIL
 NIL
@@ -561,7 +232,7 @@ salaryMaxFluctu_
 salaryMaxFluctu_
 0
 100
-10
+25
 1
 1
 NIL
@@ -591,7 +262,7 @@ n_match_
 n_match_
 0
 100
-50
+30
 1
 1
 NIL
@@ -606,7 +277,7 @@ matching_quality_threshold_
 matching_quality_threshold_
 0
 1
-0.6
+0.5
 0.1
 1
 NIL
@@ -628,10 +299,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-638
-306
-671
+5
+635
+285
+668
 unexpected_company_motivation_
 unexpected_company_motivation_
 0
@@ -643,10 +314,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-10
-604
-291
-637
+6
+601
+287
+634
 unexpected_worker_motivation_
 unexpected_worker_motivation_
 0
@@ -681,7 +352,7 @@ firing_quality_threshold_
 firing_quality_threshold_
 0
 1
-0.1
+0.5
 0.1
 1
 NIL
@@ -696,7 +367,7 @@ max_productivity_fluctuation_
 max_productivity_fluctuation_
 0
 1
-0.2
+0.3
 0.1
 1
 NIL
@@ -731,15 +402,15 @@ SWITCH
 220
 colorVisible
 colorVisible
-0
+1
 1
 -1000
 
 PLOT
-871
-222
-1216
-459
+706
+549
+1051
+715
 rate
 NIL
 %
@@ -755,10 +426,10 @@ PENS
 "unemployment_rate" 1.0 0 -3844592 true "" "plot unemployement_rate"
 
 MONITOR
-873
-474
-962
-519
+711
+736
+800
+781
 vacancy_rate
 vacancy_rate
 17
@@ -766,10 +437,10 @@ vacancy_rate
 11
 
 MONITOR
-969
-474
-1100
-519
+807
+736
+938
+781
 unemployement_rate
 unemployement_rate
 17
@@ -777,10 +448,10 @@ unemployement_rate
 11
 
 PLOT
-783
-559
-1162
-799
+319
+678
+698
+798
 unemployement
 NIL
 NIL
@@ -797,15 +468,15 @@ PENS
 "frictional_unemployement" 1.0 0 -2064490 true "" "plot frictional_unemployement_rate"
 
 PLOT
-862
-18
-1234
-168
+710
+396
+1082
+546
 Mobile mean
 NIL
 NIL
 0.0
-10.0
+100.0
 0.0
 1.0
 true
@@ -816,19 +487,183 @@ PENS
 "Vacancy rate" 1.0 0 -7500403 true "" "if length vacancy_rate_list > 0 [plot mean vacancy_rate_list]"
 
 SLIDER
-914
-179
-1104
-212
+1083
+344
+1260
+377
+maxNumberPerson_
+maxNumberPerson_
+0
+1000
+400
+50
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1083
+376
+1259
+409
+minNumberPerson_
+minNumberPerson_
+50
+1000
+100
+50
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1083
+408
+1258
+441
+stepNumberPerson_
+stepNumberPerson_
+0
+100
+30
+10
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1083
+451
+1275
+484
+maxNumberCompanies_
+maxNumberCompanies_
+0
+1000
+400
+50
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1083
+483
+1276
+516
+minNumberCompanies_
+minNumberCompanies_
+50
+1000
+100
+50
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1082
+516
+1277
+549
+stepNumberCompanies_
+stepNumberCompanies_
+0
+100
+30
+10
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1063
+253
+1235
+286
+n_ticks_max_
+n_ticks_max_
+0
+5000
+5000
+50
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1063
+290
+1235
+323
+epsilon_
+epsilon_
+0
+1
+0.2
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1064
+216
+1236
+249
 time_window_
 time_window_
 1
+200
 100
-2
 1
 1
 NIL
 HORIZONTAL
+
+SLIDER
+836
+263
+928
+296
+Person_number_
+Person_number_
+0
+500
+426
+1
+1
+NIL
+HORIZONTAL
+
+PLOT
+879
+26
+1166
+203
+Beveridge curve
+NIL
+NIL
+0.0
+1.0
+0.0
+1.0
+true
+true
+"" ""
+PENS
+"BC" 10.0 2 -13345367 true "" "plot_beveridge"
+
+SWITCH
+25
+87
+203
+120
+stop_simulations
+stop_simulations
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
