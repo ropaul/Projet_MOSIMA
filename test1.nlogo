@@ -13,7 +13,7 @@ persons-own[
   salary
   employer
   
-  time_unemployee ;; to count the frictional_unemployement
+  time_unemployed ;; to count the frictional_unemployement
 ]
 
 
@@ -33,10 +33,12 @@ globals[
   vacant_jobs
   vacancy_rate
   participation_rate
-  frictional_unemployement
+  frictional_unemployement_time
+  frictional_unemployement_rate
+  people_matched_this_turn
   structural_unemployement
   natural_unemployement
-  count_unemployee_total
+  count_unemployed_total
   
   
   
@@ -88,7 +90,7 @@ to setup_persons
     set employer nobody 
     setup_skills
     setup_salary 
-    set time_unemployee 0
+    set time_unemployed 0
   ]
 end
 
@@ -151,7 +153,7 @@ to go_person
        set seekP lput ([who] of myself) seekP 
      ]  
    ]
-     set time_unemployee time_unemployee + 1; ADD 1 to the time of unemployement
+     set time_unemployed time_unemployed + 1; ADD 1 to the time of unemployement
   ]
 end
 
@@ -173,6 +175,10 @@ to go_company
 end
 
 to go_matching
+  set people_matched_this_turn 0
+  set structural_unemployement 0
+  set frictional_unemployement_rate 0
+  set frictional_unemployement_time 0
   let n_treated (min (List (length seekP) (length seekC) n_match))
   let unemployed_treated n-of n_treated (shuffle seekP)
   let recruitors_treated n-of n_treated (shuffle seekC)
@@ -185,12 +191,12 @@ to go_matching
     let simi_company (similarity_company_to_person a_company a_person)
     let close_enough ((abs (simi_person - simi_company)) <= exceptional_matching)
     let good_enough ( (simi_person + simi_company) / 2 >= matching_quality_threshold )
-    if (close_enough and good_enough) [
+    ifelse (close_enough and good_enough) [
       ask a_company [hire_employee a_person]
       set seekP (remove-item (position a_person_number seekP) seekP)
       set seekC (remove-item (position a_company_number seekC) seekC)
     ]
-    if (not close_enough or not good_enough)[
+    [
       set structural_unemployement structural_unemployement + 1  ; UPDATE OF STRCUTURAL UNEMPLOYEMENT HERE  
     ]
   ]  
@@ -215,13 +221,20 @@ end
 
 
 to go_globals
-  set labor_force (count persons with [not haveJob] + count persons with [haveJob])
+  let working_force count persons with [haveJob]
   set unemployment_level count persons with [not haveJob] 
-   if Person_Number != 0[set unemployement_rate (unemployment_level /   Person_Number)]
-  set vacant_jobs count companies with[not haveEmployee]
-  if labor_force != 0[set vacancy_rate (vacant_jobs / labor_force)] 
-  if Person_Number != 0[set participation_rate ( labor_force / Person_Number)]
-  set natural_unemployement ( (frictional_unemployement / count_unemployee_total ) +( structural_unemployement / (ticks + 1)))
+  set labor_force (working_force + unemployment_level)
+  if labor_force != 0[
+    set unemployement_rate ( unemployment_level /   labor_force)
+    ]
+  set vacant_jobs count companies with [not haveEmployee]
+  if labor_force != 0 [
+    set vacancy_rate (vacant_jobs / labor_force)
+    ] 
+  if Person_Number != 0 [
+    set participation_rate ( labor_force / Person_Number)
+    ]
+  set natural_unemployement ( frictional_unemployement_rate  + structural_unemployement)
 end
      
 
@@ -248,13 +261,15 @@ to fire_employee [the_employee]
 end
 
 to hire_employee [the_person]
+  
+  set people_matched_this_turn (people_matched_this_turn + 1)
   set haveEmployee True
   set employee the_person
   if colorVisible [set color green]   ; HERE CHANGE OF COLOR
   ask the_person [    
     set haveJob True
-    update_frictional_unemployment time_unemployee 
-    set time_unemployee 0 ; TO CALCUL THE FRICTIONAL UNEMPLOYEMENT
+    update_frictional_unemployment time_unemployed 
+    set time_unemployed 0 ; TO CALCUL THE FRICTIONAL UNEMPLOYEMENT
     if colorVisible [set color blue ] ; HERE CHANGE OF COLOR
     set employer myself
     create-link-with myself ; HERE TO CREATE A LINK BETWEEN COMPAGY AND PERSON
@@ -323,10 +338,12 @@ to setup_globals
   set vacant_jobs count companies with[not haveEmployee]
   if labor_force != 0[set vacancy_rate (vacant_jobs / labor_force)] 
   if Person_Number != 0[set participation_rate ( labor_force / Person_Number)]
-  set frictional_unemployement 0
+  set frictional_unemployement_time 0
+  set frictional_unemployement_rate 0
   set structural_unemployement 0
   set natural_unemployement 0
-  set count_unemployee_total 0
+  set count_unemployed_total 0
+  set people_matched_this_turn 0
 end
 
 to setup_skills
@@ -347,10 +364,12 @@ end
 ;; =================================================================
 
 to update_frictional_unemployment [time]
-  set frictional_unemployement (frictional_unemployement + time)
-  set count_unemployee_total (count_unemployee_total + 1 )
+  set frictional_unemployement_time (frictional_unemployement_time + time)
+  if people_matched_this_turn != 0 [
+    set frictional_unemployement_rate (frictional_unemployement_time / people_matched_this_turn)
+    show frictional_unemployement_rate
+  ]
 end
-
 
 
 
@@ -394,8 +413,8 @@ SLIDER
 Person_Number
 Person_Number
 0
-100
-100
+500
+500
 1
 1
 NIL
@@ -409,8 +428,8 @@ SLIDER
 Compagny_Number
 Compagny_Number
 0
-100
-100
+500
+303
 1
 1
 NIL
@@ -468,8 +487,6 @@ true
 PENS
 "Unemployed" 1.0 0 -13345367 true "" "plot count persons with [not haveJob]"
 "Vacant job" 1.0 0 -2674135 true "" "plot count companies with [not haveEmployee]"
-"seekC" 1.0 0 -7500403 true "" "plot 0;;length [seekC] of matching matchingAgentWhoNumber"
-"seekP" 1.0 0 -955883 true "" "plot 0;;length [seekP] of matching matchingAgentWhoNumber"
 
 SLIDER
 11
@@ -495,7 +512,7 @@ salaryMaxFluctu
 salaryMaxFluctu
 0
 100
-0
+10
 1
 1
 NIL
@@ -525,7 +542,7 @@ n_match
 n_match
 0
 100
-7
+50
 1
 1
 NIL
@@ -540,7 +557,7 @@ matching_quality_threshold
 matching_quality_threshold
 0
 1
-0.7
+0.6
 0.1
 1
 NIL
@@ -600,7 +617,7 @@ unexpected_firing
 unexpected_firing
 0
 1
-0
+0.1
 0.1
 1
 NIL
@@ -615,7 +632,7 @@ firing_quality_threshold
 firing_quality_threshold
 0
 1
-0
+0.1
 0.1
 1
 NIL
@@ -630,7 +647,7 @@ max_productivity_fluctuation
 max_productivity_fluctuation
 0
 1
-1
+0.2
 0.1
 1
 NIL
@@ -650,19 +667,19 @@ Number
 SWITCH
 685
 147
-797
+823
 180
 linksVisible
 linksVisible
-1
+0
 1
 -1000
 
 SWITCH
-685
-180
-798
-213
+687
+187
+822
+220
 colorVisible
 colorVisible
 0
@@ -727,8 +744,8 @@ true
 "" ""
 PENS
 "natural_unemployement" 1.0 0 -16777216 true "" "plot natural_unemployement"
-"structural_unemployement" 1.0 0 -11033397 true "" "plot structural_unemployement / (ticks + 1 )"
-"frictional_unemployement" 1.0 0 -2064490 true "" "if ( count_unemployee_total > 0) [plot (frictional_unemployement / count_unemployee_total)]"
+"structural_unemployement" 1.0 0 -11033397 true "" "plot structural_unemployement"
+"frictional_unemployement" 1.0 0 -2064490 true "" "plot frictional_unemployement_rate"
 
 @#$#@#$#@
 ## WHAT IS IT?
