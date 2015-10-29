@@ -40,7 +40,9 @@ globals[
   natural_unemployement
   count_unemployed_total
   
-  
+  ;rate_memory_size ;; SLIDER
+  unemployement_rate_list
+  vacancy_rate_list
   
  ;salaryMean ;; SLIDER
  salaryMax
@@ -199,7 +201,7 @@ to go_matching
     [
       set structural_unemployement structural_unemployement + 1  ; UPDATE OF STRCUTURAL UNEMPLOYEMENT HERE  
     ]
-  ]  
+  ]
 end
 
 
@@ -235,6 +237,15 @@ to go_globals
     set participation_rate ( labor_force / Person_Number)
     ]
   set natural_unemployement ( frictional_unemployement_rate  + structural_unemployement)
+  
+  ifelse ticks < rate_memory_size [
+    set unemployement_rate_list lput unemployement_rate unemployement_rate_list
+    set vacancy_rate_list lput vacancy_rate vacancy_rate_list
+  ]
+  [
+    set unemployement_rate_list lput unemployement_rate but-first unemployement_rate_list
+    set vacancy_rate_list lput vacancy_rate but-first  vacancy_rate_list
+  ]
 end
      
 
@@ -344,6 +355,9 @@ to setup_globals
   set natural_unemployement 0
   set count_unemployed_total 0
   set people_matched_this_turn 0
+ 
+  set unemployement_rate_list []
+  set vacancy_rate_list []
 end
 
 to setup_skills
@@ -367,7 +381,6 @@ to update_frictional_unemployment [time]
   set frictional_unemployement_time (frictional_unemployement_time + time)
   if people_matched_this_turn != 0 [
     set frictional_unemployement_rate (frictional_unemployement_time / people_matched_this_turn)
-    show frictional_unemployement_rate
   ]
 end
 
@@ -687,10 +700,10 @@ colorVisible
 -1000
 
 PLOT
-851
-60
-1196
-297
+871
+222
+1216
+459
 rate
 NIL
 %
@@ -706,10 +719,10 @@ PENS
 "unemployment_rate" 1.0 0 -3844592 true "" "plot unemployement_rate"
 
 MONITOR
-853
-312
-942
-357
+873
+474
+962
+519
 vacancy_rate
 vacancy_rate
 17
@@ -717,10 +730,10 @@ vacancy_rate
 11
 
 MONITOR
-949
-312
-1080
-357
+969
+474
+1100
+519
 unemployement_rate
 unemployement_rate
 17
@@ -728,10 +741,10 @@ unemployement_rate
 11
 
 PLOT
-695
-500
-1074
-740
+783
+559
+1162
+799
 unemployement
 NIL
 NIL
@@ -746,6 +759,40 @@ PENS
 "natural_unemployement" 1.0 0 -16777216 true "" "plot natural_unemployement"
 "structural_unemployement" 1.0 0 -11033397 true "" "plot structural_unemployement"
 "frictional_unemployement" 1.0 0 -2064490 true "" "plot frictional_unemployement_rate"
+
+PLOT
+862
+18
+1234
+168
+Mobile mean
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+true
+"" ""
+PENS
+"Unemployement rate" 1.0 0 -16777216 true "" "if length unemployement_rate_list > 0 [plot  mean unemployement_rate_list]"
+"Vacancy rate" 1.0 0 -7500403 true "" "if length vacancy_rate_list > 0 [plot mean vacancy_rate_list]"
+
+SLIDER
+914
+179
+1098
+212
+rate_memory_size
+rate_memory_size
+10
+200
+100
+5
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
