@@ -1,5 +1,5 @@
 ; les différents includes
-__includes["test1.nls" "setup.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
+__includes["test1.nls" ] ;Discomment it and press the "Check" button to get the "include" dropbar
 
 
 ; le setup pour la réalisation de la courbe de beveridge  
@@ -115,14 +115,99 @@ to setup_globals_simulations
   
 end
 
- 
+; afficher les points de la courbe de beveridge 
 to plot_beveridge
   if (VacancyRateList_simulations != 0 and UnemployedRateList_simulations != 0) [
     if (length VacancyRateList_simulations > 0 and length UnemployedRateList_simulations > 0) [
       plotxy (last UnemployedRateList_simulations) (last VacancyRateList_simulations) 
     ]
   ]
+end
+
+
+; Best fit calculer grace à la méthode des moindre carré trouvé sur : http://math.unice.fr/~diener/MAB07/MCO.pdf
+to best_fit
+  if (courbe_Beveridge) [ ; tester si l'on veut afficher la régression linaire ou pas
+    set courbe_Beveridge false ; pour n'aficher qu'une seule fois la courbe
+    let unemployement_mean (mean UnemployedRateList_simulations)
+    let vacancy_mean (mean VacancyRateList_simulations)
+    let diff_v 0
+    let diff_u 0
+    let somme_diff_u 0
+    let UxV 0
+    let a  0
+    let b 0
+    foreach (n-values (length UnemployedRateList_simulations) [?] )[  ; calcul du coefficient de proportionalité et d'ordonnée a l'origine via la méthode décrite dans l'article
+      set diff_u (( item ? UnemployedRateList_simulations) - unemployement_mean)
+      set diff_v (( item ? VacancyRateList_simulations) - vacancy_mean)
+      set somme_diff_u (somme_diff_u + ( diff_u * diff_u)) 
+      set a (a + (diff_u * diff_v))
+    ]
+    set somme_diff_u somme_diff_u 
+    set a  (a / somme_diff_u)
+    set b ( vacancy_mean - ( a * unemployement_mean))
+    
+    let i 0
+    while [i < 1] [
+      plotxy ( i) ( a * i + b)  ; on affiche
+      set i i + 0.01
+    ]
+  ]
 end 
+  
+  
+  
+; enregistre les valeurs de la courbe de beveridge dans un fichier pour pouvoir les réafficher plus tard         
+to enregister
+ ; file-delete "beveridge.txt" ; efface le fichier pour pouvoir réecrire un nouveau (impossible d'éffacer le contenue d'un fichier)
+  file-open "beveridge.txt" ; ouvre le fichier
+  file-write length UnemployedRateList_simulations ; premiere valeurs ecrite : la longueurs des tableaux
+  ; ecriture dans un fichier des valeurs
+   foreach (n-values (length UnemployedRateList_simulations) [?] )[ 
+     file-write ( item ? UnemployedRateList_simulations)
+     file-write ( item ? VacancyRateList_simulations)
+   ]
+   file-close  ; ferme le fichier (pas besoin de préciser lequel)
+end 
+
+; charge les valeur des vacancy_rate et d l'unemployement rate dans les liste à partir d'un fichier exterieur
+to charge
+  if (charger)[
+    set charger false 
+    file-open "beveridge.txt"
+    set UnemployedRateList_simulations []
+    set VacancyRateList_simulations  []
+    foreach (  n-values file-read [?] ) [ ; ecrit les valeurs dans les tableaux
+      set VacancyRateList_simulations lput file-read VacancyRateList_simulations
+      set UnemployedRateList_simulations lput file-read UnemployedRateList_simulations
+      plotxy ( item ? UnemployedRateList_simulations) ( item ? VacancyRateList_simulations)
+    ]
+    file-close
+    update-plots 
+  ]
+end
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
 @#$#@#$#@
 GRAPHICS-WINDOW
 250
@@ -413,7 +498,7 @@ SWITCH
 220
 colorVisible
 colorVisible
-1
+0
 1
 -1000
 
@@ -664,6 +749,8 @@ true
 "" ""
 PENS
 "BC" 10.0 2 -13345367 true "" "plot_beveridge"
+"courbe" 1.0 0 -8053223 true "" "best_fit"
+"BC enregistré" 1.0 0 -15040220 true "" "charge"
 
 SWITCH
 25
@@ -673,6 +760,45 @@ SWITCH
 stop_simulations
 stop_simulations
 0
+1
+-1000
+
+SWITCH
+1176
+66
+1314
+99
+courbe_Beveridge
+courbe_Beveridge
+1
+1
+-1000
+
+BUTTON
+1176
+110
+1264
+143
+NIL
+enregister
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SWITCH
+1191
+164
+1294
+197
+charger
+charger
+1
 1
 -1000
 
