@@ -1,15 +1,18 @@
-__includes["test1.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
+; les différents includes
+__includes["test1.nls" "setup.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
 
-  
+
+; le setup pour la réalisation de la courbe de beveridge  
 to setup_simulations
   clear-all
-  setup_globals_simulations
+  setup_globals_simulations ; initalisation des variables de globals
   
-  setup_simulation (first rangeNumberPerson) (first rangeNumberCompanies)
+  setup_simulation (first rangeNumberPerson) (first rangeNumberCompanies) ; initalise le nombre de personne et de compagnies
  
-  reset-ticks
+  ;reset-ticks  ;;(déjà fait dans le setup_simulation)
 end
  
+; initalise le nombre de personne et de compagnies 
 to setup_simulation [n_persons n_companies];; this replace the setup of the original simulation.
   
   random-seed Rseed 
@@ -25,27 +28,30 @@ to setup_simulation [n_persons n_companies];; this replace the setup of the orig
 end 
  
  
+; go pour refaire la courbe de beveridge 
 to go_simulations 
   let index 1
-  foreach (n-values (length rangeNumberCompanies) [?])[ 
+  foreach (n-values (length rangeNumberCompanies) [?])[  ; pour  1 a rangeNumberCompanies ,faire 
     let n_companies (item ? rangeNumberCompanies)
-    foreach (n-values (length rangeNumberPerson) [?])[
+    foreach (n-values (length rangeNumberPerson) [?])[ ;pour chaque rangeNumberPerson , faire 
       let n_person (item ? rangeNumberPerson)
             
-      setup_simulation n_person n_companies
+      setup_simulation n_person n_companies ; on réinitialise le nombre de personne et de comapgnies
       print "===================================================================="   
       print (word "Number of companies for the simulation: " Compagny_Number)
       print (word "Number of persons for the simulation:" Person_Number)
        
-      while [ticks < n_ticks_max and not hasConverged] [
+      while [ticks < n_ticks_max and not hasConverged] [  ; on se limite à un nombre de ticks maximum si le programme ne converge pas
         go  
-        if stop_simulations [
+        if stop_simulations [  ; verifie si le programme converge
           stop
         ]
       ]
-      ask turtles [die]
-      let vac_rate (mean vacancy_rate_list)
+      ask turtles [die]  ; on tue les tortues
+      ;on calcul les moyennes
+      let vac_rate (mean vacancy_rate_list) ;
       let unem_rate (mean unemployement_rate_list)
+      ; met en mémoire les réusltats dans un tableaux
       set VacancyRateList_simulations lput vac_rate VacancyRateList_simulations
       set UnemployedRateList_simulations lput unem_rate UnemployedRateList_simulations
       print (word "Simulation " index " over " (length rangeNumberCompanies * length rangeNumberPerson) " ended with:")
@@ -55,15 +61,18 @@ to go_simulations
   ] 
 end
  
+; fonction qui permet de savoir si le vacancy-rate et le unemployement rate converge ou pas 
 to-report hasConverged 
   ifelse (ticks > time_window)   
   [
-    let vac_mean mean vacancy_rate_list
+    ; calcul de moyenne des vacancy_rate et unemployement_rate enregistrer dans une simulation (pour chaque ticks)
+    let vac_mean mean vacancy_rate_list  
     let unemp_mean mean unemployement_rate_list
     let canConverge True
     let index 0
     while [canConverge and index < time_window]
     [
+      ;Si une seule valeur du vacancy_rate_list - vac_mean est superieur a epsilon , alors ça ne converge pas. Les valeurs se décale de time windows
       let conv_vac ((abs (item index vacancy_rate_list) - vac_mean) < epsilon)
       let conv_unemp ((abs (item index unemployement_rate_list) - unemp_mean) < epsilon)
       set canConverge (conv_vac and conv_unemp)
@@ -76,6 +85,8 @@ to-report hasConverged
   ]    
 end
 
+
+; initilaise toutes les valeurs des variable de globals pour la simulation
 to setup_globals_simulations
   
   set maxNumberPerson max List maxNumberPerson_ minNumberPerson_
@@ -661,7 +672,7 @@ SWITCH
 120
 stop_simulations
 stop_simulations
-1
+0
 1
 -1000
 

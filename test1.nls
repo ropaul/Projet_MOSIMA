@@ -1,7 +1,9 @@
 ;__includes[""] ;Discomment it and press the "Check" button to get the "include" dropbar
 
+; necessaire pour utiliser des tableaux
 extensions [array table]
 
+; nos trois type d'agent : les PERSONS , les COMPANIES et les MATCHINGS (un seul matching pour l'instant)
 breed[persons person]
 breed[companies company]
 breed[matchings matching]
@@ -27,28 +29,28 @@ companies-own[
   employee
 ]
 
+; les différents variables du problème
 globals[
   ; Statistic variables :
-  labor_force
-  unemployment_level
-  unemployement_rate
-  vacant_jobs
-  vacancy_rate
-  participation_rate
-  frictional_unemployement_time
-  frictional_unemployement_rate
-  people_matched_this_turn
-  structural_unemployement
-  natural_unemployement
-  count_unemployed_total
-  
-  unemployement_rate_list
-  vacancy_rate_list 
+  labor_force ; definie dans l'artcle
+  unemployment_level ;; definie dans l'artcle
+  unemployement_rate ; definie dans l'artcle
+  vacant_jobs ; definie dans l'artcle
+  vacancy_rate ; definie dans l'artcle
+  participation_rate  ; definie dans l'artcle
+  frictional_unemployement_time ; definie dans l'artcle
+  frictional_unemployement_rate ; definie dans l'artcle
+  people_matched_this_turn ; nombre de matching par tour
+  structural_unemployement ; ; definie dans l'artcle
+  natural_unemployement ; definie dans l'artcle
+  count_unemployed_total ; definie dans l'artcle
+  unemployement_rate_list ; liste des valeurs de unemployement_rate
+  vacancy_rate_list  ; liste des valeurs de vacancy_rate
  
- time_window
+ time_window ; WHAT THE FUCK IS THAT ?
  ; Multiple simulations variables
-  maxNumberPerson
-  minNumberPerson
+  maxNumberPerson  
+  minNumberPerson 
   stepNumberPerson
   rangeNumberPerson
   maxNumberCompanies
@@ -56,7 +58,7 @@ globals[
   stepNumberCompanies
   rangeNumberCompanies
   n_ticks_max
-  epsilon 
+  epsilon ; seuil
   VacancyRateList_simulations
   UnemployedRateList_simulations
   
@@ -81,8 +83,8 @@ globals[
 ]
 
 matchings-own [
-   seekC   
-   seekP 
+   seekC   ; ça sert ?
+   seekP  ; même question
 ]
 
 ;; =================================================================
@@ -90,44 +92,46 @@ matchings-own [
 ;; =================================================================
    
 to setup
-  clear-all
+  clear-all  ; efface tout dans l'interface
   
-  random-seed Rseed
-  setup_globals
+  random-seed Rseed  ; seed pour rendre tout reproductible 
+  setup_globals ; 
   setup_persons
   setup_companies
   setup_matching
-  
-  reset-ticks
+  reset-ticks ; mettre les ticks à zero
 end 
 
+; initialise les agents PERSONS
 to setup_persons  
-  set-default-shape persons "person"
+  set-default-shape persons "person" ; donne une superbe aparence de personne à nos PERSONS
   create-persons Person_Number  ;; création des agents PERSON
-  [ set color white
-    set size 1.5 
-    setxy random-xcor random-ycor
-    set haveJob False
-    set employer nobody 
-    setup_skills
-    setup_salary 
-    set time_unemployed 0
+  [ set color white ; ils sont blanc
+    set size 1.5  ; ils sont grand
+    setxy random-xcor random-ycor ; ils sont partout
+    set haveJob False  ; il commencent sans travail
+    set employer nobody  ; personne ne les emploie
+    setup_skills ; ils sont des skill (initialisé)
+    setup_salary  ; ils veulent un salaire
+    set time_unemployed 0 ; temps  pas employé
   ]
 end
 
+; Initialise les agents COMPANIES
 to setup_companies  
-  set-default-shape  companies "house"
-  create-companies Compagny_Number
-  [ set color grey
-    set size 1.5
-    setxy random-xcor random-ycor
-    set haveEmployee False
-    set employee nobody
-    setup_skills
-    setup_salary 
+  set-default-shape  companies "house" ; donne une aparence de maison
+  create-companies Compagny_Number 
+  [ set color grey ; gris
+    set size 1.5 ; grand pareil
+    setxy random-xcor random-ycor ; disperse les entreprises
+    set haveEmployee False ; pas d'employer pour le moment
+    set employee nobody ; personne n'est leurs employé
+    setup_skills ; ont besoins de certainens compétences
+    setup_salary  ; offre un certains salaire
   ]
 end
 
+; initialise les agents MATCHINGS
 to setup_matching
   set-default-shape  matchings "target"
   create-matchings 1
@@ -147,15 +151,15 @@ end
 ;; GO PROCEDURES
 ;; =================================================================
 
+
+; fonction go, tout se fait ici (normalement)
 to go
-  
   ask persons[
-    go_person
+    go_person 
   ]
   ask companies[
     go_company
-  ]
-  
+  ]  
   ask matchings [
     go_matching
   ]
@@ -167,63 +171,66 @@ to go
   tick
 end
 
+; action de chaques personnes 
 to go_person
-  if not haveJob [
+  if not haveJob [  ; si n'as pas de job faire 
    ask matching matchingAgentWhoNumber [
-     if not member? ([who] of myself) seekP [
-       set seekP lput ([who] of myself) seekP 
+     if not member? ([who] of myself) seekP [ ; si le matchings ne te connait pas faire
+       set seekP lput ([who] of myself) seekP  ; être ajouter au matchings
      ]  
    ]
      set time_unemployed time_unemployed + 1; ADD 1 to the time of unemployement
   ]
 end
 
+; action pour chaque compagnies
 to go_company
-  ifelse not haveEmployee [
-    ask matching matchingAgentWhoNumber [
+  ifelse not haveEmployee [ ; si n'a pas d'employé faire 
+    ask matching matchingAgentWhoNumber [ ; si le matchings ne te connait pas faire
      if not member? ([who] of myself) seekC [
-       set seekC lput ([who] of myself) seekC 
+       set seekC lput ([who] of myself) seekC ; etre ajouter au matching
      ]
     ]
   ]
-  [
-    let bad_productivity ((productivity skills ([skills] of employee)) < firing_quality_threshold)
-    let bad_luck (random-float 1 < unexpected_firing)
+  [ ; sinon (le ifelse , ici c'est le else)
+    let bad_productivity ((productivity skills ([skills] of employee)) < firing_quality_threshold) ; si l'employé n'est pas productif , le remercier
+    let bad_luck (random-float 1 < unexpected_firing) ; si l'employé n'est pas chanceux , le remercier
     if (bad_productivity or bad_luck) [
       fire_employee(employee)
     ]
   ]
 end
 
+; action du matching
 to go_matching
   set people_matched_this_turn 0
   set structural_unemployement 0
   set frictional_unemployement_rate 0
   set frictional_unemployement_time 0
-  let n_treated (min (List (length seekP) (length seekC) n_match))
-  let unemployed_treated n-of n_treated (shuffle seekP)
-  let recruitors_treated n-of n_treated (shuffle seekC)
-  foreach (n-values n_treated [?])[
-    let a_person_number (item ? unemployed_treated)
-    let a_company_number (item ? recruitors_treated)
-    let a_person (person a_person_number)
-    let a_company (company a_company_number)
-    let simi_person (similarity_person_to_company a_person a_company)
-    let simi_company (similarity_company_to_person a_company a_person)
-    let close_enough ((abs (simi_person - simi_company)) <= exceptional_matching)
-    let good_enough ( (simi_person + simi_company) / 2 >= matching_quality_threshold )
-    ifelse (close_enough and good_enough) [
-      ask a_company [hire_employee a_person]
+  let n_treated (min (List (length seekP) (length seekC) n_match)) ; n_treated = la taille minimum entre seekP et seekC
+  let unemployed_treated n-of n_treated (shuffle seekP)  ; shuffle : modifie aléatoirement la place des différents éléments dans le tableau seekP et prend n_treated du tableau seekP
+  let recruitors_treated n-of n_treated (shuffle seekC) ; pareil avec seekC (pour plus de clareté , peut être le faire en 2 lignes)
+  foreach (n-values n_treated [?])[  ; pour 1 a n_treated
+    let a_person_number (item ? unemployed_treated) ;prende un numero d'agent PERSON sans emploie 
+    let a_company_number (item ? recruitors_treated) ; pareil avec COMPANIES
+    let a_person (person a_person_number) ;prende un agent PERSON sans emploie
+    let a_company (company a_company_number) ; pareil 
+    let simi_person (similarity_person_to_company a_person a_company) ; fonction pour calculer la similarité entre personne/compagnie pour personne
+    let simi_company (similarity_company_to_person a_company a_person) ; fonction pour calculer la similarité entre compagnie/personne pour compagnie
+    let close_enough ((abs (simi_person - simi_company)) <= exceptional_matching) ; regarde si les similarité sont proches
+    let good_enough ( (simi_person + simi_company) / 2 >= matching_quality_threshold ) ; regarde si la moyenne des similarité sont assez haute pour etre satisfaisante
+    ifelse (close_enough and good_enough) [ ; si les conditions sont bonnes , alors il y a matching
+      ask a_company [hire_employee a_person] 
       set seekP (remove-item (position a_person_number seekP) seekP)
       set seekC (remove-item (position a_company_number seekC) seekC)
     ]
-    [
+    [ ; sinon , il n'y a pas embouche et on augmente le structural_unemployement
       set structural_unemployement structural_unemployement + 1  ; UPDATE OF STRCUTURAL UNEMPLOYEMENT HERE  
     ]
   ]
 end
 
-
+; met a jour les liens , si on veut les voir au pas
 to go_links
   if linksVisible [
     ask links [ set color white]
@@ -233,6 +240,7 @@ to go_links
   ]
 end
 
+; met a jour les couleurs, si on veut les voir ou pas (si couleur activé en cours de route, les couleurs ne se mettent pas automatiquement)
 to go_color
   if colorVisible = false [
     ask companies [set color grey]
@@ -240,28 +248,28 @@ to go_color
   ]
 end
 
-
+; update des différentes variable de la simulation
 to go_globals
-  let working_force count persons with [haveJob]
-  set unemployment_level count persons with [not haveJob] 
-  set labor_force (working_force + unemployment_level)
+  let working_force count persons with [haveJob]  ; compte le nombre de personne avec emploie
+  set unemployment_level count persons with [not haveJob]  ;  compte le combre de personne sans emploie  
+  set labor_force (working_force + unemployment_level) ; les nombre de personne avec un emploie et ceux sans emploie mais qui cherche un emploie
   if labor_force != 0[
-    set unemployement_rate ( unemployment_level /   labor_force)
+    set unemployement_rate ( unemployment_level /   labor_force) ; calcul le unemployement_rate
     ]
   set vacant_jobs count companies with [not haveEmployee]
   if labor_force != 0 [
-    set vacancy_rate (vacant_jobs / labor_force)
+    set vacancy_rate (vacant_jobs / labor_force) ; calcul le vacancy_rate
     ] 
   if Person_Number != 0 [
-    set participation_rate ( labor_force / Person_Number)
+    set participation_rate ( labor_force / Person_Number) ; calcul le particpation_rate
     ]
-  set natural_unemployement ( frictional_unemployement_rate  + structural_unemployement)
+  set natural_unemployement ( frictional_unemployement_rate  + structural_unemployement) ; calcul le natural_unemplyement
   
-  ifelse ticks < time_window [
+  ifelse ticks < time_window [ ; un tableau avec les différente valeur de unemplyment_rate et vacancy_rate ?
     set unemployement_rate_list lput unemployement_rate unemployement_rate_list
     set vacancy_rate_list lput vacancy_rate vacancy_rate_list
   ]
-  [
+  [ ; cette liste se vide peut a peut
     set unemployement_rate_list lput unemployement_rate but-first unemployement_rate_list
     set vacancy_rate_list lput vacancy_rate but-first  vacancy_rate_list
   ]
@@ -272,15 +280,17 @@ end
 ;; DYNAMICS PROCEDURES
 ;; =================================================================
 
+; calcul la productivté d'un employé
 to-report productivity [skills1 skills2]
-  let basic_productivity (skillSimilarity skills1 skills2)
-  let luck ((random-float (2 * max_productivity_fluctuation)) - max_productivity_fluctuation)
+  let basic_productivity (skillSimilarity skills1 skills2) ; calcul sa productivité de base
+  let luck ((random-float (2 * max_productivity_fluctuation)) - max_productivity_fluctuation) ; variation selon la chance de l'employé
   report (basic_productivity + luck)
 end
 
+; comment virer son employé
 to fire_employee [the_employee]
-  set haveEmployee False
-  set employee nobody
+  set haveEmployee False 
+  set employee nobody 
   set color grey   ; HERE CHANGE OF COLOR
   ask the_employee [ 
     set haveJob False
@@ -290,15 +300,15 @@ to fire_employee [the_employee]
     ]
 end
 
-to hire_employee [the_person]
-  
+; comment engager un emploié
+to hire_employee [the_person]  
   set people_matched_this_turn (people_matched_this_turn + 1)
   set haveEmployee True
   set employee the_person
   if colorVisible [set color green]   ; HERE CHANGE OF COLOR
   ask the_person [    
     set haveJob True
-    update_frictional_unemployment time_unemployed 
+    update_frictional_unemployment time_unemployed ; met à jour le frictional_unemployement 
     set time_unemployed 0 ; TO CALCUL THE FRICTIONAL UNEMPLOYEMENT
     if colorVisible [set color blue ] ; HERE CHANGE OF COLOR
     set employer myself
@@ -312,29 +322,33 @@ end
 ;; =================================================================
 
 
+; calcul la similarité entre les skills
 to-report skillSimilarity [skills1 skills2]
   let accu 0
   foreach (n-values n_skills [?]) [
    let skill_of_1 (array:item skills1 ?) 
    let skill_of_2 (array:item skills2 ?)
    if (skill_of_1 = skill_of_2) [
-    set accu (accu + 1) 
+    set accu (accu + 1)  ; regarde si les skill demandé sont les même , si oui , +1
    ]
   ]  
   report (accu / n_skills)
 end 
 
+; calcul la similarité de distance (distance euclidienne)
 to-report localisationSimilarity [x1 y1 x2 y2]
   let dist sqrt ((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
   report 1. - dist / distMax
 end
 
+; calcul la similarité des salaire
 to-report salarySimilarity [salary1 salary2]
   let diff (salary1 - salary2)
   let temp (1. + diff / salaryMax)
   report (temp / 2)
 end
 
+; calcul la similarité d'une personne pour une personne
 to-report similarity_person_to_company[a_person a_company]
   let accu 0
   set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company))
@@ -344,6 +358,7 @@ to-report similarity_person_to_company[a_person a_company]
   report ( (accu + motivation) / (3 + unexpected_worker_motivation) )
 end
 
+; calcul la similarité pour une comagnie
 to-report similarity_company_to_person[a_company a_person]
   let accu 0
   set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company))
@@ -358,6 +373,8 @@ end
 ;; MISCELLAENOUS VARIABLES SETTINGS
 ;; =================================================================
 
+
+; initialise les variable global de la simulation
 to setup_globals 
   ;; let's get sliders' values
  set time_window time_window_;; SLIDER
@@ -396,6 +413,8 @@ to setup_globals
   set vacancy_rate_list []
 end
 
+
+; initialise les skills (utilisable par les agents PERSONS et COMPANIES)
 to setup_skills
   set skills array:from-list n-values n_skills [0]
   foreach (n-values n_skills [?]) [
@@ -403,6 +422,7 @@ to setup_skills
   ]
 end
 
+; initalise les salaire (utilisable par les agents PERSONS et COMPANIES)
 to setup_salary
   let random_variation (random salaryMaxFluctu)
   set salary (salaryMean + random_variation)
@@ -413,6 +433,7 @@ end
 ;; STATISTICS FUNCTIONS
 ;; =================================================================
 
+;met a jour le frictional_unemployment
 to update_frictional_unemployment [time]
   set frictional_unemployement_time (frictional_unemployement_time + time)
   if people_matched_this_turn != 0 [
