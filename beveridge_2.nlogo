@@ -36,24 +36,30 @@ to go_simulations
     foreach (n-values (length rangeNumberPerson) [?])[ ;pour chaque rangeNumberPerson , faire 
       let n_person (item ? rangeNumberPerson)
             
-      setup_simulation n_person n_companies ; on réinitialise le nombre de personne et de comapgnies
       print "===================================================================="   
       print (word "Number of companies for the simulation: " Compagny_Number)
       print (word "Number of persons for the simulation:" Person_Number)
-       
-      while [ticks < n_ticks_max and not hasConverged] [  ; on se limite à un nombre de ticks maximum si le programme ne converge pas
-        go  
-        if stop_simulations [  ; verifie si le programme converge
-          stop
-        ]
-      ]
-      ask turtles [die]  ; on tue les tortues
-      ;on calcul les moyennes
-      let vac_rate (mean vacancy_rate_list) ;
-      let unem_rate (mean unemployement_rate_list)
+     
+     let vac_rate 0
+     let unem_rate 0
+     let n_sub_simu 10
+     foreach (n-values n_sub_simu [?]) [  ; simulation will be repeated 10 times with different random seed       
+       setup_simulation n_person n_companies ; on réinitialise le nombre de personne et de comapgnies
+       set Rseed ? 
+       while [ticks < n_ticks_max and not hasConverged] [  ; on se limite à un nombre de ticks maximum si le programme ne converge pas
+         go  
+         if stop_simulations [  ; verifie si le programme converge
+           stop
+         ]
+       ]
+       ask turtles [die]  ; on tue les tortues
+                          ;on calcul les moyennes
+       set vac_rate (vac_rate + (mean vacancy_rate_list)) 
+       set unem_rate (unem_rate + (mean unemployement_rate_list))
+     ]
       ; met en mémoire les réusltats dans un tableaux
-      set VacancyRateList_simulations lput vac_rate VacancyRateList_simulations
-      set UnemployedRateList_simulations lput unem_rate UnemployedRateList_simulations
+      set VacancyRateList_simulations lput (vac_rate / n_sub_simu) VacancyRateList_simulations
+      set UnemployedRateList_simulations lput (unem_rate / n_sub_simu) UnemployedRateList_simulations
       print (word "Simulation " index " over " (length rangeNumberCompanies * length rangeNumberPerson) " ended with:")
       print (word "--- a vacancy rate of: " vac_rate " and an unemployed rate of: " unem_rate)
       set index (index + 1)
@@ -484,7 +490,7 @@ INPUTBOX
 753
 129
 Rseed
-1
+8
 1
 0
 Number
@@ -600,7 +606,7 @@ maxNumberPerson_
 maxNumberPerson_
 0
 1000
-400
+1000
 50
 1
 NIL
@@ -630,7 +636,7 @@ stepNumberPerson_
 stepNumberPerson_
 0
 100
-30
+50
 10
 1
 NIL
@@ -645,7 +651,7 @@ maxNumberCompanies_
 maxNumberCompanies_
 0
 1000
-400
+1000
 50
 1
 NIL
@@ -675,7 +681,7 @@ stepNumberCompanies_
 stepNumberCompanies_
 0
 100
-30
+50
 10
 1
 NIL
@@ -720,7 +726,7 @@ time_window_
 time_window_
 1
 200
-100
+140
 1
 1
 NIL
