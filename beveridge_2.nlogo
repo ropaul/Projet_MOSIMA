@@ -126,11 +126,13 @@ end
 
 
 ; Best fit calculer grace à la méthode des moindre carré trouvé sur : http://math.unice.fr/~diener/MAB07/MCO.pdf
+; As the curve is assumed to be exponential, we switch to a logarithmic space to perform the least square regression
 to best_fit
-  if (courbe_Beveridge) [ ; tester si l'on veut afficher la régression linaire ou pas
-    set courbe_Beveridge false ; pour n'aficher qu'une seule fois la courbe
-    let unemployement_mean (mean UnemployedRateList_simulations)
-    let vacancy_mean (mean VacancyRateList_simulations)
+  if (courbe_Beveridge and length UnemployedRateList_simulations > 1 and length VacancyRateList_simulations > 1) [ 
+    ;;if (courbe_Beveridge) [ ; tester si l'on veut afficher la régression linaire ou pas
+    ;;set courbe_Beveridge false ; pour n'aficher qu'une seule fois la courbe
+    let unemployement_mean (mean (map [ln ?] UnemployedRateList_simulations)) 
+    let vacancy_mean (mean (map [ln ?] VacancyRateList_simulations))
     let diff_v 0
     let diff_u 0
     let somme_diff_u 0
@@ -138,19 +140,25 @@ to best_fit
     let a  0
     let b 0
     foreach (n-values (length UnemployedRateList_simulations) [?] )[  ; calcul du coefficient de proportionalité et d'ordonnée a l'origine via la méthode décrite dans l'article
-      set diff_u (( item ? UnemployedRateList_simulations) - unemployement_mean)
-      set diff_v (( item ? VacancyRateList_simulations) - vacancy_mean)
+      set diff_u (ln ( item ? UnemployedRateList_simulations) - unemployement_mean)
+      set diff_v (ln ( item ? VacancyRateList_simulations) - vacancy_mean)
       set somme_diff_u (somme_diff_u + ( diff_u * diff_u)) 
       set a (a + (diff_u * diff_v))
     ]
     set somme_diff_u somme_diff_u 
-    set a  (a / somme_diff_u)
-    set b ( vacancy_mean - ( a * unemployement_mean))
-    
-    let i 0
-    while [i < 1] [
-      plotxy ( i) ( a * i + b)  ; on affiche
-      set i i + 0.01
+    if (somme_diff_u != 0) [
+      set a  (a / somme_diff_u)
+      set b ( vacancy_mean - ( a * unemployement_mean))
+      
+      set-current-plot "Beveridge curve"
+      set-current-plot-pen "Best fit"
+      plot-pen-reset     
+      let i 0.1
+      while [i < 1] [
+        plotxy ( i) ( e ^ (a * (ln i) + b))  ; on affiche
+        set i i + 0.01
+      ]
+      set-plot-y-range 0 (ceiling (max VacancyRateList_simulations))
     ]
   ]
 end 
@@ -750,7 +758,7 @@ true
 "" ""
 PENS
 "BC" 10.0 2 -13345367 true "" "plot_beveridge"
-"courbe" 1.0 0 -8053223 true "" "best_fit"
+"Best fit" 1.0 0 -8053223 true "" "best_fit"
 "BC enregistré" 1.0 0 -15040220 true "" "charge"
 
 SWITCH
@@ -771,7 +779,7 @@ SWITCH
 99
 courbe_Beveridge
 courbe_Beveridge
-1
+0
 1
 -1000
 
