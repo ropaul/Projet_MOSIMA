@@ -207,6 +207,16 @@ end
 ; comment
 ;comment
 
+; comment
+;comment
+
+
+
+; comment
+;comment
+
+
+
 
 
 
@@ -260,7 +270,7 @@ Compagny_Number_
 Compagny_Number_
 0
 500
-303
+100
 1
 1
 NIL
@@ -403,7 +413,7 @@ exceptional_matching_
 exceptional_matching_
 0
 1
-0.2
+1
 0.1
 1
 NIL
@@ -636,7 +646,11 @@ stepNumberPerson_
 stepNumberPerson_
 0
 100
+<<<<<<< HEAD
+100
+=======
 50
+>>>>>>> 83b5c87383cdd91619e9558ce756ff7ecf523910
 10
 1
 NIL
@@ -681,7 +695,11 @@ stepNumberCompanies_
 stepNumberCompanies_
 0
 100
+<<<<<<< HEAD
+100
+=======
 50
+>>>>>>> 83b5c87383cdd91619e9558ce756ff7ecf523910
 10
 1
 NIL
@@ -741,7 +759,7 @@ Person_number_
 Person_number_
 0
 500
-426
+100
 1
 1
 NIL
@@ -816,6 +834,28 @@ charger
 1
 1
 -1000
+
+MONITOR
+734
+249
+826
+294
+NIL
+count persons
+17
+1
+11
+
+MONITOR
+727
+313
+832
+358
+NIL
+count companies
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

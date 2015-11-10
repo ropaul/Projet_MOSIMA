@@ -1,4 +1,4 @@
-__includes["go.nls"  "setup.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
+__includes["goSensibiliteParametre.nls"  "setup.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
 
 ; necessaire pour utiliser des tableaux
 extensions [array table]
@@ -323,7 +323,7 @@ matching_quality_threshold
 matching_quality_threshold
 0
 1
-0.4
+0.5
 0.1
 1
 NIL
@@ -338,7 +338,7 @@ exceptional_matching
 exceptional_matching
 0
 1
-1
+0.1
 0.1
 1
 NIL
@@ -383,7 +383,7 @@ unexpected_firing
 unexpected_firing
 0
 0.1
-0
+0.01
 0.001
 1
 NIL
@@ -398,7 +398,7 @@ firing_quality_threshold
 firing_quality_threshold
 0
 1
-0.2
+0.5
 0.1
 1
 NIL
@@ -413,7 +413,7 @@ max_productivity_fluctuation
 max_productivity_fluctuation
 0
 1
-0.8
+0.3
 0.1
 1
 NIL
@@ -452,28 +452,6 @@ colorVisible
 1
 -1000
 
-MONITOR
-721
-424
-810
-469
-vacancy_rate
-vacancy_rate
-17
-1
-11
-
-MONITOR
-817
-424
-948
-469
-unemployement_rate
-unemployement_rate
-17
-1
-11
-
 PLOT
 695
 500
@@ -492,37 +470,7 @@ true
 PENS
 "natural_unemployement" 1.0 0 -16777216 true "" "plot natural_unemployement"
 "structural_unemployement" 1.0 0 -11033397 true "" "plot structural_unemployement / (ticks + 1 )"
-"frictional_unemployement" 1.0 0 -2064490 true "" "if ( count_unemployee_total > 0) [plot (frictional_unemployement / count_unemployee_total)]"
-
-SLIDER
-677
-281
-849
-314
-n_simulation
-n_simulation
-0
-100
-10
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-676
-318
-848
-351
-delta
-delta
-1
-20
-5
-1
-1
-NIL
-HORIZONTAL
+"frictional_unemployement" 1.0 0 -2064490 true "" "if ( count_unemployed_total > 0) [plot (frictional_unemployement_rate / count_unemployed_total)]"
 
 PLOT
 969

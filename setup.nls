@@ -1,0 +1,115 @@
+;; =================================================================
+;; SETUP PROCEDURES
+;; =================================================================
+   
+to setup
+  clear-all  ; efface tout dans l'interface
+  
+  random-seed Rseed  ; seed pour rendre tout reproductible 
+  setup_globals ; 
+  setup_persons
+  setup_companies
+  setup_matching
+  reset-ticks ; mettre les ticks à zero
+end 
+
+; initialise les agents PERSONS
+to setup_persons  
+  set-default-shape persons "person" ; donne une superbe aparence de personne à nos PERSONS
+  create-persons Person_Number  ;; création des agents PERSON
+  [ set color white ; ils sont blanc
+    set size 1.5  ; ils sont grand
+    setxy random-xcor random-ycor ; ils sont partout
+    set haveJob False  ; il commencent sans travail
+    set employer nobody  ; personne ne les emploie
+    setup_skills ; ils sont des skill (initialisé)
+    setup_salary  ; ils veulent un salaire
+    set time_unemployed 0 ; temps  pas employé
+  ]
+end
+
+; Initialise les agents COMPANIES
+to setup_companies  
+  set-default-shape  companies "house" ; donne une aparence de maison
+  create-companies Compagny_Number 
+  [ set color grey ; gris
+    set size 1.5 ; grand pareil
+    setxy random-xcor random-ycor ; disperse les entreprises
+    set haveEmployee False ; pas d'employer pour le moment
+    set employee nobody ; personne n'est leurs employé
+    setup_skills ; ont besoins de certainens compétences
+    setup_salary  ; offre un certains salaire
+  ]
+end
+
+; initialise les agents MATCHINGS
+to setup_matching
+  set-default-shape  matchings "target"
+  create-matchings 1
+  [ set color orange
+    set size 2.
+    setxy 0 0
+    set seekP []
+    set seekC []
+    set matchingAgentWhoNumber who
+    ]
+end
+
+;; =================================================================
+;; MISCELLAENOUS VARIABLES SETTINGS
+;; =================================================================
+
+
+; initialise les variable global de la simulation
+to setup_globals 
+  ;; let's get sliders' values
+ ;set time_window time_window_;; SLIDER
+ ;set salaryMean salaryMean_;; SLIDER  
+ ;set salaryMaxFluctu salaryMaxFluctu_ ;; SLIDER
+; set n_skills n_skills_;; SLIDER
+; set n_match n_match_ ;; SLIDER
+; set matching_quality_threshold matching_quality_threshold_ ;; SLIDER
+; set exceptional_matching exceptional_matching_ ;; SLIDER
+; set unexpected_company_motivation unexpected_company_motivation_ ;; SLIDER
+; set unexpected_worker_motivation unexpected_worker_motivation_ ;; SLIDER
+; set unexpected_firing  unexpected_firing_ ;; SLIDER
+; set firing_quality_threshold firing_quality_threshold_ ;; SLIDER
+; set max_productivity_fluctuation max_productivity_fluctuation_ ;; SLIDER 
+; set Person_Number Person_Number_;; SLIDER
+; set Compagny_Number Compagny_Number_;; SLIDER
+ 
+ 
+  set salaryMax ( salaryMean + salaryMaxFluctu)
+  set distMax (world-width * world-width +  world-height *  world-height )
+  
+  set labor_force (count persons with [not haveJob] + count persons with [haveJob])
+  set unemployment_level count persons with [not haveJob] 
+   if Person_Number != 0[set unemployement_rate (unemployment_level /   Person_Number)]
+  set vacant_jobs count companies with[not haveEmployee]
+  if labor_force != 0[set vacancy_rate (vacant_jobs / labor_force)] 
+  if Person_Number != 0[set participation_rate ( labor_force / Person_Number)]
+  set frictional_unemployement_time 0
+  set frictional_unemployement_rate 0
+  set structural_unemployement 0
+  set natural_unemployement 0
+  set count_unemployed_total 0
+  set people_matched_this_turn 0
+ 
+  set unemployement_rate_list []
+  set vacancy_rate_list []
+end
+
+
+; initialise les skills (utilisable par les agents PERSONS et COMPANIES)
+to setup_skills
+  set skills array:from-list n-values n_skills [0]
+  foreach (n-values n_skills [?]) [
+    array:set skills ? (random 2) 
+  ]
+end
+
+; initalise les salaire (utilisable par les agents PERSONS et COMPANIES)
+to setup_salary
+  let random_variation (random salaryMaxFluctu)
+  set salary (salaryMean + random_variation)
+end

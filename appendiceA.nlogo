@@ -1,4 +1,4 @@
-__includes["go.nls"  "setup.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
+__includes["goAppendiceA.nls"  "setup.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
 
 ; necessaire pour utiliser des tableaux
 extensions [array table]
@@ -77,6 +77,8 @@ globals[
  distMax
  matchingAgentWhoNumber
  
+ M
+ 
  ;Person_Number
  ;Compagny_Number
  ;Rseed ;; INPUT
@@ -141,6 +143,7 @@ matchings-own [
 ;end
 ;
 ;
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 238
@@ -178,7 +181,7 @@ Person_Number
 Person_Number
 0
 200
-101
+100
 1
 1
 NIL
@@ -193,7 +196,7 @@ Compagny_Number
 Compagny_Number
 0
 200
-101
+100
 1
 1
 NIL
@@ -300,21 +303,6 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-480
-181
-513
-n_match
-n_match
-0
-100
-7
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
 8
 521
 262
@@ -383,7 +371,7 @@ unexpected_firing
 unexpected_firing
 0
 0.1
-0
+0.016
 0.001
 1
 NIL
@@ -398,7 +386,7 @@ firing_quality_threshold
 firing_quality_threshold
 0
 1
-0.2
+0.4
 0.1
 1
 NIL
@@ -413,7 +401,7 @@ max_productivity_fluctuation
 max_productivity_fluctuation
 0
 1
-0.8
+0.7
 0.1
 1
 NIL
@@ -443,9 +431,9 @@ linksVisible
 
 SWITCH
 685
-183
+180
 798
-216
+213
 colorVisible
 colorVisible
 0
@@ -495,10 +483,10 @@ PENS
 "frictional_unemployement" 1.0 0 -2064490 true "" "if ( count_unemployee_total > 0) [plot (frictional_unemployement / count_unemployee_total)]"
 
 SLIDER
-677
-281
-849
-314
+678
+231
+850
+264
 n_simulation
 n_simulation
 0
@@ -510,10 +498,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-676
-318
-848
-351
+677
+268
+849
+301
 delta
 delta
 1
@@ -525,10 +513,10 @@ NIL
 HORIZONTAL
 
 PLOT
-969
-85
-1253
-241
+822
+41
+1106
+197
 chomage
 NIL
 NIL
@@ -540,52 +528,58 @@ true
 true
 "" ""
 PENS
-"unemployed rate" 1.0 0 -16777216 true "" "plot unemployement_rate"
-"long time unemployed rate" 1.0 0 -7500403 true "" "if (Labor_force != 0 ) [ plot ((count persons with [ time_unemployed >= long_time_unemployed ] ) / Labor_force )]"
-
-TEXTBOX
-1012
-12
-1162
-30
-courbe de la question 1.4  
-11
-0.0
-1
-
-PLOT
-971
-258
-1258
-434
-happiness treshold
-NIL
-NIL
-0.0
-10.0
-0.0
-1.0
-true
-true
-"" ""
-PENS
-"of COMPANIES" 1.0 0 -16644859 true "" "companies_happiness"
-"of PERSONS" 1.0 0 -14439633 true "" "persons_happiness"
+"taux du chomage" 1.0 0 -16777216 true "" "plot unemployement_rate"
 
 SLIDER
-969
-48
-1141
-81
-long_time_unemployed
-long_time_unemployed
+679
+333
+851
+366
+K
+K
 0
-10
-5
+100
+50
 1
 1
 NIL
 HORIZONTAL
+
+SLIDER
+680
+370
+852
+403
+s
+s
+0
+100
+50
+1
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+686
+314
+836
+332
+paramètre de l'appendice A
+11
+0.0
+1
+
+MONITOR
+909
+244
+966
+289
+NIL
+M
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
