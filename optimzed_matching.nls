@@ -1,0 +1,54 @@
+
+; calcul la similarité entre les skills
+to-report optimized_skillSimilarity [skills1 skills2]
+  let accu 0
+  foreach (n-values n_skills [?]) [
+   let skill_of_1 (array:item skills1 ?) 
+   let skill_of_2 (array:item skills2 ?)
+   if (skill_of_1 = skill_of_2) [
+    set accu (accu + 1)  ; regarde si les skill demandé sont les même , si oui , +1
+   ]
+  ]  
+  report utility_function (accu / n_skills)
+end 
+
+; calcul la similarité de distance (distance euclidienne)
+to-report optimized_localisationSimilarity [x1 y1 x2 y2]
+  let dist sqrt ((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
+  report  utility_function 1. - dist / distMax
+end
+
+; calcul la similarité des salaire
+to-report optimized_salarySimilarity [salary1 salary2]
+  let diff (salary1 - salary2)
+  let temp (1. + diff / salaryMax)
+  report utility_function (temp / 2)
+end
+
+; calcul la similarité d'une personne pour une personne
+to-report optimized_similarity_person_to_company[a_person a_company]
+  let accu 0
+  set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company)) * weight_skill_person ; ajout de poid
+  set accu (accu + localisationSimilarity ([xcor] of a_person) ([ycor] of a_person) ([xcor] of a_company) ([ycor] of a_company)) * weight_distance_person ; ajout de poid
+  set accu (accu + salarySimilarity ([salary] of a_person) ([salary] of a_company))   * weight_salary_person; ajout de poid
+  set accu accu / ( weight_skill_companies + weight_distance_companies + weight_salary_companies )  ; NORMALISATION
+  let motivation (random-float unexpected_worker_motivation)
+  report ( (accu + motivation) / (3 + unexpected_worker_motivation) )
+end
+
+; calcul la similarité pour une comagnie
+to-report optimized_similarity_company_to_person[a_company a_person]
+  let accu 0
+  set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company)) * weight_skill_companies ; ajout de poid
+  set accu (accu + localisationSimilarity ([xcor] of a_person) ([ycor] of a_person) ([xcor] of a_company) ([ycor] of a_company)) * weight_distance_companies ; ajout de poid
+  set accu (accu + salarySimilarity ([salary] of a_company) ([salary] of a_person)) * weight_salary_companies ; ajout de poid
+  set accu accu / ( weight_skill_companies + weight_distance_companies + weight_salary_companies )  ; NORMALISATION
+  let motivation (random-float unexpected_company_motivation)
+  report ( (accu + motivation) / (3 + unexpected_company_motivation) )
+end
+
+
+
+to-report utility_function [number]
+  report 1 / (1 + e ^ (-1 * number))
+end

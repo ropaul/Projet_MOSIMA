@@ -1,0 +1,27 @@
+to resign
+  if (haveJob)[
+    let resign? (random-float 1 )
+    if (resign? < unexpected_resignation)[
+      quit
+    ]
+  ]
+end 
+
+
+to optimezed_resign
+  if (haveJob)[
+    let resign? (similarity_person_to_company self employer) + (productivity [skills] of employer skills )
+    if (resign? < unexpected_resignation)[
+      quit
+    ]
+  ]
+end
+
+to quit
+  let me self
+  if (haveJob)[ ask employer [fire_employee me] ]
+
+end
+
+
+  
