@@ -1,98 +1,14 @@
-__includes["go.nls"  "setup.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
-
-; necessaire pour utiliser des tableaux
-extensions [array table]
-
-; nos trois type d'agent : les PERSONS , les COMPANIES et les MATCHINGS (un seul matching pour l'instant)
-breed[persons person]
-breed[companies company]
-breed[matchings matching]
+__includes["code/go.nls"  "code/setup.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
 
 
+to setup  
+  setup_sliders_globals_base ; Use the slider's value in the graphical interface
+  setup_simulation           ; Initialize the simulation variable
+end
 
-; attribut des persons (la position est récuperable par des fonction de netlogo)
-persons-own[
-  haveJob
-  skills
-  salary
-  employer
-  
-  time_unemployed ;; to count the frictional_unemployement
-]
-
-
-; atribut des compagnies (la position est récuperable par des fonction de netlogo)
-companies-own[
-  haveEmployee
-  skills
-  salary
-  employee
-]
-
-; les différents variables du problème
-globals[
-  ; Statistic variables :
-  labor_force ; definie dans l'artcle
-  unemployment_level ;; definie dans l'artcle
-  unemployement_rate ; definie dans l'artcle
-  vacant_jobs ; definie dans l'artcle
-  vacancy_rate ; definie dans l'artcle
-  participation_rate  ; definie dans l'artcle
-  frictional_unemployement_time ; definie dans l'artcle
-  frictional_unemployement_rate ; definie dans l'artcle
-  people_matched_this_turn ; nombre de matching par tour
-  structural_unemployement ; ; definie dans l'artcle
-  natural_unemployement ; definie dans l'artcle
-  count_unemployed_total ; definie dans l'artcle
-  unemployement_rate_list ; liste des valeurs de unemployement_rate
-  vacancy_rate_list  ; liste des valeurs de vacancy_rate
- 
- time_window ; WHAT THE FUCK IS THAT ?
- ; Multiple simulations variables
-  maxNumberPerson  
-  minNumberPerson 
-  stepNumberPerson
-  rangeNumberPerson
-  maxNumberCompanies
-  minNumberCompanies
-  stepNumberCompanies
-  rangeNumberCompanies
-  n_ticks_max
-  epsilon ; seuil
-  VacancyRateList_simulations
-  UnemployedRateList_simulations
-  
- ;salaryMean ;; SLIDER
- salaryMax
- ;salaryMaxFluctu ;; SLIDER
- ;n_skills ;; SLIDER
- ;n_match ;; SLIDER
- ;matching_quality_threshold ;; SLIDER
- ;exceptional_matching ;; SLIDER
- ;unexpected_company_motivation ;; SLIDER
- ;unexpected_worker_motivation ;; SLIDER
- ;unexpected_firing ;; SLIDER
- ;firing_quality_threshold ;; SLIDER
- ;max_productivity_fluctuation ;; SLIDER
- distMax
- matchingAgentWhoNumber
- 
- ;Person_Number
- ;Compagny_Number
- ;Rseed ;; INPUT
-]
-
-matchings-own [
-   seekC   ; ça sert ?
-   seekP  ; même question
-]
-
-
-
-
-
-   
-
+to go 
+  go_simulation ; run the simulation
+end
 
 
 
@@ -172,10 +88,10 @@ ticks
 SLIDER
 23
 32
-195
+201
 65
-Person_Number
-Person_Number
+Person_Number_
+Person_Number_
 0
 200
 101
@@ -187,10 +103,10 @@ HORIZONTAL
 SLIDER
 23
 78
-195
+225
 111
-Compagny_Number
-Compagny_Number
+Compagny_Number_
+Compagny_Number_
 0
 200
 101
@@ -259,8 +175,8 @@ SLIDER
 268
 183
 301
-salaryMean
-salaryMean
+salaryMean_
+salaryMean_
 0
 100
 50
@@ -272,10 +188,10 @@ HORIZONTAL
 SLIDER
 10
 301
-182
+188
 334
-salaryMaxFluctu
-salaryMaxFluctu
+salaryMaxFluctu_
+salaryMaxFluctu_
 0
 100
 17
@@ -289,8 +205,8 @@ SLIDER
 226
 182
 259
-n_skills
-n_skills
+n_skills_
+n_skills_
 1
 10
 5
@@ -304,8 +220,8 @@ SLIDER
 480
 181
 513
-n_match
-n_match
+n_match_
+n_match_
 0
 100
 7
@@ -319,8 +235,8 @@ SLIDER
 521
 262
 554
-matching_quality_threshold
-matching_quality_threshold
+matching_quality_threshold_
+matching_quality_threshold_
 0
 1
 0.4
@@ -334,8 +250,8 @@ SLIDER
 553
 262
 586
-exceptional_matching
-exceptional_matching
+exceptional_matching_
+exceptional_matching_
 0
 1
 1
@@ -345,12 +261,12 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-638
-258
-671
-unexpected_company_motivation
-unexpected_company_motivation
+11
+642
+268
+675
+unexpected_company_motivation_
+unexpected_company_motivation_
 0
 1
 0.1
@@ -360,12 +276,12 @@ NIL
 HORIZONTAL
 
 SLIDER
-10
-604
-258
-637
-unexpected_worker_motivation
-unexpected_worker_motivation
+12
+608
+260
+641
+unexpected_worker_motivation_
+unexpected_worker_motivation_
 0
 1
 0.1
@@ -379,8 +295,8 @@ SLIDER
 417
 234
 450
-unexpected_firing
-unexpected_firing
+unexpected_firing_
+unexpected_firing_
 0
 0.1
 0
@@ -394,8 +310,8 @@ SLIDER
 351
 234
 384
-firing_quality_threshold
-firing_quality_threshold
+firing_quality_threshold_
+firing_quality_threshold_
 0
 1
 0.2
@@ -409,8 +325,8 @@ SLIDER
 384
 234
 417
-max_productivity_fluctuation
-max_productivity_fluctuation
+max_productivity_fluctuation_
+max_productivity_fluctuation_
 0
 1
 0.8
@@ -424,7 +340,7 @@ INPUTBOX
 69
 753
 129
-Rseed
+Rseed_
 1
 1
 0

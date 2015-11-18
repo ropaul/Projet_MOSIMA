@@ -11,8 +11,9 @@ More specifically:
 These "*.nolo" files only exploit the below files and propose specific graphic interface.
 
 In the folder "code" there are thematic code grouped together:
-  --- "go.nls" containing all the dynamic procedures of the simulations
+  --- "go.nls" presenting all the dynamic procedures of the simulations
   --- "setup.nls" containing all the variable declarations and default values
-  --- "display.nls" where all the graph and regressin are created
+  --- "display.nls" where all the graph and regressing are created
+  --- "measures.nls" compute the different evaluation of the simulations
   ---
-  ---
+  --- "miscellaneous.nls" store what cannot fit elsewhere

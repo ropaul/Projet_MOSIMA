@@ -1,0 +1,23 @@
+;; =================================================================
+;; DISPLAYS PROCEDURES
+;; =================================================================
+
+
+; Show (or not) the link between each agent person and the agent company which employ it -----------------------------------------------------------------------
+to go_links
+  if linksVisible [
+    ask links [ set color white]
+  ]
+  if linksVIsible = false [
+    ask links [ set color black]
+  ]
+end
+
+; Show (or not) a colored agent depending of its employement status ----------------------------------------------------------------------- 
+;met a jour les couleurs, si on veut les voir ou pas (si couleur activé en cours de route, les couleurs ne se mettent pas automatiquement)
+to go_color
+  if colorVisible = false [
+    ask companies [set color grey]
+    ask persons [set color white]
+  ]
+end

@@ -1,0 +1,97 @@
+;; =================================================================
+;; MEASURES PROCEDURES
+;; =================================================================
+
+
+; Compute the productivity of an agent person (is usually called by an agent company)
+to-report productivity [skills1 skills2]
+  
+  let basic_productivity (skillSimilarity skills1 skills2)                                    ; the basis of it's productivity is the similarity between its skills and the one needed for the job
+  let luck ((random-float (2 * max_productivity_fluctuation)) - max_productivity_fluctuation) ; on top of the that a random factor is added
+  report (basic_productivity + luck)
+  
+end
+
+
+;; =================================================================
+;; SIMILARITY PROCEDURES
+;; =================================================================
+
+
+; calcul la similarité entre les skills
+to-report skillSimilarity [skills1 skills2]
+  let accu 0
+  foreach (n-values n_skills [?]) [
+    let skill_of_1 (array:item skills1 ?) 
+    let skill_of_2 (array:item skills2 ?)
+    if (skill_of_1 = skill_of_2) [
+      set accu (accu + 1)  ; regarde si les skill demandé sont les même , si oui , +1
+    ]
+  ]  
+  report (accu / n_skills)
+end 
+
+; calcul la similarité de distance (distance euclidienne)
+to-report localisationSimilarity [x1 y1 x2 y2]
+  let dist sqrt ((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
+  report 1. - dist / distMax
+end
+
+; calcul la similarité des salaire
+to-report salarySimilarity [salary1 salary2]
+  let diff (salary1 - salary2)
+  let temp (1. + diff / salaryMax)
+  report (temp / 2)
+end
+
+; calcul la similarité d'une personne pour une personne
+to-report similarity_person_to_company[a_person a_company]
+  let accu 0
+  set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company))
+  set accu (accu + localisationSimilarity ([xcor] of a_person) ([ycor] of a_person) ([xcor] of a_company) ([ycor] of a_company))
+  set accu (accu + salarySimilarity ([salary] of a_person) ([salary] of a_company))
+  let motivation (random-float unexpected_worker_motivation)
+  report ( (accu + motivation) / (3 + unexpected_worker_motivation) )
+end
+
+; calcul la similarité pour une comagnie
+to-report similarity_company_to_person[a_company a_person]
+  let accu 0
+  set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company))
+  set accu (accu + localisationSimilarity ([xcor] of a_person) ([ycor] of a_person) ([xcor] of a_company) ([ycor] of a_company))
+  set accu (accu + salarySimilarity ([salary] of a_company) ([salary] of a_person))
+  let motivation (random-float unexpected_company_motivation)
+  report ( (accu + motivation) / (3 + unexpected_company_motivation) )
+end
+
+
+to persons_happiness
+  let happiness 0
+  let numberOfPerson 0 
+  ask persons[
+    if (haveJob)[
+      set happiness (happiness + similarity_person_to_company  self  employer )
+      set numberOfPerson numberOfPerson + 1 
+    ]
+  ]
+  if (numberOfPerson != 0) [
+    plot happiness / numberOfPerson
+  ]
+end
+
+
+to companies_happiness
+  let happiness 0 
+  let numberOfCompanies 0
+  ask companies [
+    if (haveEmployee) [
+      set happiness (happiness + similarity_company_to_person self employee)
+      set numberOfCompanies numberOfCompanies + 1
+    ]
+  ]
+  if (numberOfCompanies != 0 ) [
+    plot happiness /  numberOfCompanies
+  ]
+end
+
+

@@ -1,0 +1,137 @@
+;; =================================================================
+;; GO PROCEDURES
+;; =================================================================
+
+
+; Run a sole simulation. Keep calling it if you want several tick to be run.
+to go_simulation
+  
+  ask persons[
+    go_person 
+  ]
+  ask companies[
+    go_company
+  ]  
+  ask matchings [
+    go_matching
+  ]
+  
+  go_links
+  go_color
+  go_globals
+  
+  tick
+end
+
+
+; Dynamic simulation of a single agent person. -----------------------------------------------------------------------
+; It will first try to find a job.
+to go_person
+  
+  if not haveJob [                             ; if the agent person has no job
+    ask matching matchingAgentWhoNumber [      ; it asks for one to the matching agent
+      if not member? ([who] of myself) seekP [ ; which check first if the agent person is already in its list
+        set seekP lput ([who] of myself) seekP ; and eventually add it to it.
+      ]  
+    ]
+    set time_unemployed time_unemployed + 1    ; At each tick we keep track of the time the agent person was unemployed
+  ]
+  
+end
+
+
+; Dynamic simulation of a single agent company. -----------------------------------------------------------------------
+; It will either try to find a job, or try to fire its employee.
+to go_company
+  
+  ifelse not haveEmployee [                    ; If the agent company has no job
+    ask matching matchingAgentWhoNumber [      ; it asks for one to the matching agent,
+      if not member? ([who] of myself) seekC [ ; which check first if the agent person is already in its list
+        set seekC lput ([who] of myself) seekC ; and eventually add it to it.
+      ]
+    ]
+  ]
+  [                                                   ; if the agent company already has an amployee it will verify its productivity
+    let bad_productivity ((productivity skills ([skills] of employee)) < firing_quality_threshold) ; and fire him if it is unsufficent
+    let bad_luck (random-float 1 < unexpected_firing) ; and has also a given chance to unexpectedly fire it.
+    if (bad_productivity or bad_luck) [
+      fire_employee(employee)
+    ]
+  ]
+end
+
+; Dynamic simulation of a single agent matching. -----------------------------------------------------------------------
+; It will try to match a restricted number of agent person and agent company.
+to go_matching
+  
+  ; At the begining of this tick, the statistic are reset to zero.
+  set people_matched_this_turn 0
+  set structural_unemployement 0
+  set frictional_unemployement_rate 0
+  set frictional_unemployement_time 0
+  
+  let n_treated (min (List (length seekP) (length seekC) n_match)) ; It first determines the exact number (n_treated) of agents processed
+                                                                   ;       (it is the minimum number between the matching agent capacity (n_match) and the lists of candidats)
+  let unemployed_treated n-of n_treated (shuffle seekP)            ; then it selects some agents in each lists (seekP and seekC)
+  let recruitors_treated n-of n_treated (shuffle seekC)            ; and makes sure that they are ordered randomly (shuffle)
+  
+  foreach (n-values n_treated [?])[                                ; Exactly "n_treated" pairs will now we tested.
+    
+    let a_person_number (item ? unemployed_treated)                ; To avoid unecessary (and onerous) manipulation of agent list we refer to them through their number
+    let a_company_number (item ? recruitors_treated) 
+    let a_person (person a_person_number)                          ; and we directly use it to manipulate the agent person and the agent company.
+    let a_company (company a_company_number) 
+    
+    let simi_person (similarity_person_to_company a_person a_company)  ; The similarity between an agent person and an agent company is computed
+    let simi_company (similarity_company_to_person a_company a_person) ; as well as between a company and a person 
+    
+    let close_enough ((abs (simi_person - simi_company)) <= exceptional_matching)      ; Then it assess that their similiratiies are on the same scale
+    let good_enough ( (simi_person + simi_company) / 2 >= matching_quality_threshold ) ; and if they are similar enough to be matched
+    
+    ifelse (close_enough and good_enough) [                             ; If the two conditions above are met, the matching occurs.
+      ask a_company [hire_employee a_person]                            ;    The agent company employ the agent person
+      set seekP (remove-item (position a_person_number seekP) seekP)    ;    and both agent are withdraw from the lists
+      set seekC (remove-item (position a_company_number seekC) seekC) 
+    ]
+    [                                                                   ; Otherwise, the matching fail
+      set structural_unemployement structural_unemployement + 1         ;   in this case we update the "structural_unemployement" counter
+    ]
+  ]
+end
+
+
+; Updates the statistic of the simulation
+to go_globals
+  
+  let working_force count persons with [haveJob]                                         ; The number of employed agents person
+  set unemployment_level count persons with [not haveJob]                                ; The number of unemployed agents person 
+  set labor_force (working_force + unemployment_level)                                   ; The number of agents person having or looking for a job
+  if labor_force != 0[
+    set unemployement_rate ( unemployment_level /   labor_force)                         ; The proportion of non-working agents person
+  ]
+  set vacant_jobs count companies with [not haveEmployee]                                ; The number of vacant jobs
+  if labor_force != 0 [
+    set vacancy_rate (vacant_jobs / labor_force)                                         ; The proportion of unoccupied jobs 
+  ] 
+  if Person_Number != 0 [
+    set participation_rate ( labor_force / Person_Number)                                ; The proportion of people engaged in job or job seeking
+  ]
+  set natural_unemployement ( frictional_unemployement_rate  + structural_unemployement) ; Global unemployement level 
+  
+                                                                                         ; Here we store the unemployed rate and the vacancy rate over several ticks in a "sliding window" fashion
+  ifelse (time_window <= 0 or ticks < time_window) [                                                           ; When not enough values are strored, it keep storing them
+    set unemployement_rate_list lput unemployement_rate unemployement_rate_list
+    set vacancy_rate_list lput vacancy_rate vacancy_rate_list
+  ]
+  [                                                                                      ; But when enough of them are present, the first one progressively replace by the previous while new values arrive
+    set unemployement_rate_list lput unemployement_rate but-first unemployement_rate_list
+    set vacancy_rate_list lput vacancy_rate but-first  vacancy_rate_list
+  ]
+end
+
+
+
+
+
+
+

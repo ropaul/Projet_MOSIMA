@@ -1,0 +1,41 @@
+
+
+; Fire an employee (is usually called by an agent company)
+to fire_employee [the_employee]
+  
+  set haveEmployee False 
+  set employee nobody 
+  
+  set color grey   ; HERE CHANGE OF COLOR
+  ask the_employee [ 
+    set haveJob False
+    set employer nobody
+    set color white     ; HERE CHANGE OF COLOR
+    ask my-links [die]  ; HERE TO DESTROY A LINK BETWEEN COMPAGY AND PERSON
+  ]
+end
+
+; comment engager un emploié
+to hire_employee [the_person]  
+  set people_matched_this_turn (people_matched_this_turn + 1)
+  set haveEmployee True
+  set employee the_person
+  if colorVisible [set color green]   ; HERE CHANGE OF COLOR
+  ask the_person [    
+    set haveJob True
+    update_frictional_unemployment time_unemployed ; met à jour le frictional_unemployement 
+    set time_unemployed 0 ; TO CALCUL THE FRICTIONAL UNEMPLOYEMENT
+    if colorVisible [set color blue ] ; HERE CHANGE OF COLOR
+    set employer myself
+    create-link-with myself ; HERE TO CREATE A LINK BETWEEN COMPAGY AND PERSON
+  ]  
+end
+
+
+;met a jour le frictional_unemployment
+to update_frictional_unemployment [time]
+  set frictional_unemployement_time (frictional_unemployement_time + time)
+  if people_matched_this_turn != 0 [
+    set frictional_unemployement_rate (frictional_unemployement_time / people_matched_this_turn)
+  ]
+end
