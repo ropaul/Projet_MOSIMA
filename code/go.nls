@@ -114,7 +114,7 @@ to go_globals
     set vacancy_rate (vacant_jobs / labor_force)                                         ; The proportion of unoccupied jobs 
   ] 
   if Person_Number != 0 [
-    set participation_rate ( labor_force / Person_Number)                                ; The proportion of people engaged in job or job seeking
+    set participation_rate ( labor_force / Person_Number)                                ; The proportion of people engaged in a job or in job seeking
   ]
   set natural_unemployement ( frictional_unemployement_rate  + structural_unemployement) ; Global unemployement level 
   

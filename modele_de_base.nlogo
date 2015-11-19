@@ -1,7 +1,9 @@
 __includes["code/go.nls"  "code/setup.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls"] ;Discomment it and press the "Check" button to get the "include" dropbar
 
 
-to setup  
+to setup    
+  clear-all  
+  
   setup_sliders_globals_base ; Use the slider's value in the graphical interface
   setup_simulation           ; Initialize the simulation variable
 end
@@ -12,6 +14,25 @@ end
 
 
 
+; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) (only for the base model)
+to setup_sliders_globals_base
+  
+  set salaryMean salaryMean_                       
+  set salaryMaxFluctu salaryMaxFluctu_            
+  set n_skills n_skills_
+  set n_match n_match_ 
+  set matching_quality_threshold matching_quality_threshold_ 
+  set exceptional_matching exceptional_matching_ 
+  set unexpected_company_motivation unexpected_company_motivation_ 
+  set unexpected_worker_motivation unexpected_worker_motivation_ 
+  set unexpected_firing  unexpected_firing_ 
+  set firing_quality_threshold firing_quality_threshold_ 
+  set max_productivity_fluctuation max_productivity_fluctuation_  
+  set Person_Number Person_Number_
+  set Compagny_Number Compagny_Number_
+  set Rseed Rseed_
+ 
+end
 
 ;;; =================================================================
 ;;; FUNCTIONS TO HAVE THE BEVERIDGE PLOT
@@ -369,10 +390,10 @@ colorVisible
 -1000
 
 MONITOR
-721
-424
-810
-469
+714
+333
+803
+378
 vacancy_rate
 vacancy_rate
 17
@@ -380,10 +401,10 @@ vacancy_rate
 11
 
 MONITOR
-817
-424
-948
-469
+810
+333
+941
+378
 unemployement_rate
 unemployement_rate
 17
@@ -391,10 +412,10 @@ unemployement_rate
 11
 
 PLOT
-695
-500
-1074
-740
+694
+406
+1258
+699
 unemployement
 NIL
 NIL
@@ -409,36 +430,6 @@ PENS
 "natural_unemployement" 1.0 0 -16777216 true "" "plot natural_unemployement"
 "structural_unemployement" 1.0 0 -11033397 true "" "plot structural_unemployement / (ticks + 1 )"
 "frictional_unemployement" 1.0 0 -2064490 true "" "if ( count_unemployee_total > 0) [plot (frictional_unemployement / count_unemployee_total)]"
-
-SLIDER
-677
-281
-849
-314
-n_simulation
-n_simulation
-0
-100
-10
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-676
-318
-848
-351
-delta
-delta
-1
-20
-5
-1
-1
-NIL
-HORIZONTAL
 
 PLOT
 969
@@ -457,51 +448,6 @@ true
 "" ""
 PENS
 "unemployed rate" 1.0 0 -16777216 true "" "plot unemployement_rate"
-"long time unemployed rate" 1.0 0 -7500403 true "" "if (Labor_force != 0 ) [ plot ((count persons with [ time_unemployed >= long_time_unemployed ] ) / Labor_force )]"
-
-TEXTBOX
-1012
-12
-1162
-30
-courbe de la question 1.4  
-11
-0.0
-1
-
-PLOT
-971
-258
-1258
-434
-happiness treshold
-NIL
-NIL
-0.0
-10.0
-0.0
-1.0
-true
-true
-"" ""
-PENS
-"of COMPANIES" 1.0 0 -16644859 true "" "companies_happiness"
-"of PERSONS" 1.0 0 -14439633 true "" "persons_happiness"
-
-SLIDER
-969
-48
-1141
-81
-long_time_unemployed
-long_time_unemployed
-0
-10
-5
-1
-1
-NIL
-HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

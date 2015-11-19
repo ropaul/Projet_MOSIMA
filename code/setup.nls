@@ -3,87 +3,93 @@
 ;; =================================================================
 
 
-; nos trois type d'agent : les PERSONS , les COMPANIES et les MATCHINGS (un seul matching pour l'instant)
+extensions [array table]
+
+; The three agent types : PERSON COMPANY or MATCHING
 breed[persons person]
 breed[companies company]
 breed[matchings matching]
 
-; attribut des persons (la position est récuperable par des fonction de netlogo)
+; Agent person attributs
 persons-own[
-  haveJob
-  skills
-  salary
-  employer
+  ; Simulation variables:
+  haveJob                 ; The employement status of the agent
+  skills                  ; Its personal skill
+  salary                  ; Its desired salary
+  employer                ; Its potential employer
   
-  time_unemployed ;; to count the frictional_unemployement
+  ; Statistics variables:
+  time_unemployed         ; store the time since the last employement
 ]
 
 
-; atribut des compagnies (la position est récuperable par des fonction de netlogo)
+;  Agent company attributs
 companies-own[
-  haveEmployee
-  skills
-  salary
-  employee
+  haveEmployee           ; The employement status of the agent
+  skills                 ; The skill needed for its job
+  salary                 ; The proposed salary
+  employee               ; Its potential employee
 ]
 
-; necessaire pour utiliser des tableaux
-extensions [array table]
 
-
-
-globals[
-  ; Statistic variables:
-  labor_force                      ; TODO
-  unemployment_level               ; TODO
-  unemployement_rate               ; TODO
-  vacant_jobs                      ; TODO
-  vacancy_rate                     ; TODO
-  participation_rate               ; TODO
-  frictional_unemployement_time    ; TODO
-  frictional_unemployement_rate    ; TODO
-  people_matched_this_turn         ; TOTRANSLATE nombre de matching par tour
-  structural_unemployement         ; TODO
-  natural_unemployement            ; TODO
-  count_unemployed_total           ; TODO
-  unemployement_rate_list          ; TOTRANSLATE liste des valeurs de unemployement_rate
-  vacancy_rate_list                ; TOTRANSLATE liste des valeurs de vacancy_rate
-  
-  time_window                      ; Size of the "slidding window"
-  
- ; Multiple simulations variables:
-  maxNumberPerson                  ; TODO
-  minNumberPerson                  ; TODO
-  stepNumberPerson                 ; TODO
-  rangeNumberPerson                ; TODO
-  maxNumberCompanies               ; TODO
-  minNumberCompanies               ; TODO
-  stepNumberCompanies              ; TODO
-  rangeNumberCompanies             ; TODO
-  n_ticks_max                      ; TODO
-  epsilon                          ; TOTRANSLATE seuil
-  VacancyRateList_simulations      ; TODO
-  UnemployedRateList_simulations   ; TODO
+; Globals variables of all the simulations
+globals[ 
   
   ; Simulation variables:
- salaryMean                        ; TODO
- salaryMax                         ; TODO
- salaryMaxFluctu                   ; TODO
- n_skills                          ; TODO
- n_match                           ; TODO
- matching_quality_threshold        ; TODO
- exceptional_matching              ; TODO
- unexpected_company_motivation     ; TODO
- unexpected_worker_motivation      ; TODO
- unexpected_firing                 ; TODO
- firing_quality_threshold          ; TODO
- max_productivity_fluctuation      ; TODO
- distMax                           ; TODO
- matchingAgentWhoNumber            ; TODO
+ salaryMean                        ; Mean of the salary distribution
+ salaryMax                         ; Maximum salary
+ salaryMaxFluctu                   ; Deviation from the mean salary
+ n_skills                          ; Number of skills agents can have
+ n_match                           ; Number maximum of match tested at each turn by the agent MATCHING
+ matching_quality_threshold        ; Lower bound on the similarity score for a a couple of agents PERSON and COMPANY to be accepted
+ exceptional_matching              ; Higher bound on the difference of the similarity score for a couple of agents PERSON and COMPANY to be accepted
+ unexpected_company_motivation     ; Random deviation to the similarity score of an agent COMPANY
+ unexpected_worker_motivation      ; Random deviation to the similarity score of an agent PERSON
+ unexpected_firing                 ; Probability of an employee to be fired for no reason
+ firing_quality_threshold          ; Lower bound on the productivity for an employee not be fired
+ max_productivity_fluctuation      ; Random deviation to the productivity of an employee
+ distMax                           ; Maximum distance in the simulation's world
+ matchingAgentWhoNumber            ; Identifier of the agent MAYCHING
  
- Person_Number                     ; TODO
- Compagny_Number                   ; TODO
- Rseed                             ; TODO
+ Person_Number                     ; Number of agents PERSON in a simulation
+ Compagny_Number                   ; Number of agents COMPANY in a simulation
+ Rseed                             ; Random seed used by the simulation
+ 
+  ; Statistic variables:
+  
+  labor_force                      ; The number of agents person having or looking for a job
+  unemployment_level               ; The number of unemployed agents person 
+  unemployement_rate               ; The proportion of non-working agents person
+  vacant_jobs                      ; The number of unoccupied jobs
+  vacancy_rate                     ; The proportion of unoccupied jobs
+  participation_rate               ; The proportion of people engaged in a job or in job seeking
+  frictional_unemployement_time    ; Cumulated delay before finding a job for those actively seeking one
+  frictional_unemployement_rate    ; Average delay to find a job when looking for one
+  people_matched_this_turn         ; Number of agents person which find a job this turn
+  structural_unemployement         ; Number of mismatch between potential employees and potentials employer each turn
+  natural_unemployement            ; Global unemployement level 
+  count_unemployed_total           ; Number total of unemployed agents person
+  unemployement_rate_list          ; unemployement_rate values over time
+  vacancy_rate_list                ; vacancy_rate over time
+  
+  
+  time_window                      ; Size of the "slidding window" used by the moving mean(s)
+  
+ ; Multiple simulations variables:
+ 
+  maxNumberPerson                  ; Maximum number of agent PERSON in all the simulations
+  minNumberPerson                  ; Minimum number of agent PERSON in all the simulations
+  stepNumberPerson                 ; Step used to describe the possible numbers of agents PERSON
+  rangeNumberPerson                ; List of all the possible numbers of agents PERSON
+  maxNumberCompanies               ; Maximum number of agent COMPANY in all the simulations
+  minNumberCompanies               ; Minimum number of agent COMPANY in all the simulations
+  stepNumberCompanies              ; Step used to describe the possible numbers of agents COMPANY
+  rangeNumberCompanies             ; List of all the possible numbers of agents COMPANY
+  
+  n_ticks_max                      ; Maximum number of tick in a simulation
+  epsilon                          ; Maximum deviation from the moving mean(s) allowed
+  VacancyRateList_simulations      ; Final vacancy_rate values over simulations  
+  UnemployedRateList_simulations   ; Final unemployement_rate values over simulations  
 ]
 
 matchings-own [
@@ -97,129 +103,130 @@ matchings-own [
 ;; SETUP PROCEDURES
 ;; =================================================================
    
+; Setup up all the non-sliders variables. Sliders setup should be call before this function.
 to setup_simulation
-  clear-all  ; efface tout dans l'interface
   
-  random-seed Rseed  ; seed pour rendre tout reproductible 
+  random-seed Rseed  
   setup_globals ; 
   setup_persons
   setup_companies
   setup_matching
-  reset-ticks ; mettre les ticks à zero
+  
+  reset-ticks 
 end 
 
-; Initialize the agents PERSONS
+; Initialize the agents PERSON
 to setup_persons  
-  set-default-shape persons "person" ; donne une superbe aparence de personne à nos PERSONS
-  create-persons Person_Number  ;; création des agents PERSON
-  [ set color white ; ils sont blanc
-    set size 1.5  ; ils sont grand
-    setxy random-xcor random-ycor ; ils sont partout
-    set haveJob False  ; il commencent sans travail
-    set employer nobody  ; personne ne les emploie
-    setup_skills ; ils sont des skill (initialisé)
-    setup_salary  ; ils veulent un salaire
-    set time_unemployed 0 ; temps  pas employé
+  
+  set-default-shape persons "person"       ; Give a "human" shape to the agents person
+  create-persons Person_Number             ; Create "Person_Number" agents person with attributs:
+  [ ; Physical attributs:
+    set color white                        ;    color
+    set size 1.5                           ;    size
+    setxy random-xcor random-ycor          ;    (random) position
+    ; Simulation attributs;
+    set haveJob False                      ;    employement status
+    set employer nobody                    ;    employer
+    setup_skills                           ;    personal skills
+    setup_salary                           ;    desired salary
+    ; Statistic attributs:
+    set time_unemployed 0                  ;    time unemployed
   ]
+  
 end
 
-; Initialize the agents COMPANIES
+; Initialize the agents COMPANY
 to setup_companies  
-  set-default-shape  companies "house" ; donne une aparence de maison
-  create-companies Compagny_Number 
-  [ set color grey ; gris
-    set size 1.5 ; grand pareil
-    setxy random-xcor random-ycor ; disperse les entreprises
-    set haveEmployee False ; pas d'employer pour le moment
-    set employee nobody ; personne n'est leurs employé
-    setup_skills ; ont besoins de certainens compétences
-    setup_salary  ; offre un certains salaire
+  
+  set-default-shape  companies "house"    ; Give a "house" shape to the agents company
+  create-companies Compagny_Number        ; Create "Compagny_Number" agents company with attributs:
+  [ ; Physical attributs:
+    set color grey                        ;    color
+    set size 1.5                          ;    size
+    setxy random-xcor random-ycor         ;    (random) position
+    ; Simulation attributs;
+    set haveEmployee False                ;    employement status
+    set employee nobody                   ;    employer
+    setup_skills                          ;    personal skills
+    setup_salary                          ;    desired salary
   ]
 end
 
-; Initialize the agents MATCHINGS
+; Initialize the agents MATCHING
 to setup_matching
-  set-default-shape  matchings "target"
-  create-matchings 1
-  [ set color orange
-    set size 2.
-    setxy 0 0
-    set seekP []
-    set seekC []
-    set matchingAgentWhoNumber who
+  
+  set-default-shape  matchings "target"  ; Give a "target" shape to the agent matching
+  create-matchings 1                     ; Create 1 agent matching with attributs:
+  [ ; Physical attributs:
+    set color orange                     ;     color
+    set size 2.                          ;     size
+    setxy 0 0                            ;     (central) position
+    ; Simulation attributs:
+    set seekP []                         ;     list of potential employees (agents person)
+    set seekC []                         ;     list of potential recruitors (agents company)
+    
+    set matchingAgentWhoNumber who       ; "matchingAgentWhoNumber" enable other agents to find this particular agent
     ]
 end
+
 
 ;; =================================================================
 ;; MISCELLAENOUS VARIABLES SETTINGS
 ;; =================================================================
 
 
-; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) (only for the base model)
-to setup_sliders_globals_base
-  
-  set salaryMean salaryMean_                       
-  set salaryMaxFluctu salaryMaxFluctu_            
-  set n_skills n_skills_
-  set n_match n_match_ 
-  set matching_quality_threshold matching_quality_threshold_ 
-  set exceptional_matching exceptional_matching_ 
-  set unexpected_company_motivation unexpected_company_motivation_ 
-  set unexpected_worker_motivation unexpected_worker_motivation_ 
-  set unexpected_firing  unexpected_firing_ 
-  set firing_quality_threshold firing_quality_threshold_ 
-  set max_productivity_fluctuation max_productivity_fluctuation_  
-  set Person_Number Person_Number_
-  set Compagny_Number Compagny_Number_
- 
-end
 
 ; Initiate the variables of the simulation
 to setup_globals  
  
-  set salaryMax (salaryMean + salaryMaxFluctu)
-  set distMax (world-width * world-width +  world-height *  world-height )
+  set salaryMax (salaryMean + salaryMaxFluctu)                                          ; The maximum salaray possible in the simulation
+  set distMax (world-width * world-width +  world-height *  world-height ) / 4          ; The maximum distance in this toric simulation
   
-  set labor_force (count persons with [not haveJob] + count persons with [haveJob])
-  set unemployment_level count persons with [not haveJob] 
+  set labor_force (count persons with [not haveJob] + count persons with [haveJob])     ; The number of agents person having or looking for a job
+  set unemployment_level count persons with [not haveJob]                               ; The number of unemployed agents person 
   
-  if Person_Number != 0 [set unemployement_rate (unemployment_level /   Person_Number)]
-  set vacant_jobs count companies with[not haveEmployee]
-  if labor_force != 0[set vacancy_rate (vacant_jobs / labor_force)] 
-  if Person_Number != 0[set participation_rate ( labor_force / Person_Number)]
+  if Person_Number != 0 [
+    set unemployement_rate (unemployment_level /   Person_Number)                       ; The proportion of non-working agents person
+    ]
+  set vacant_jobs count companies with[not haveEmployee]                                ; The number of vacant jobs
+  if labor_force != 0 [
+    set vacancy_rate (vacant_jobs / labor_force)                                        ; The proportion of unoccupied jobs
+  ] 
+  if Person_Number != 0 [
+    set participation_rate ( labor_force / Person_Number)                               ; The proportion of people engaged in a job or in job seeking
+    ]
   
-  set frictional_unemployement_time 0
-  set frictional_unemployement_rate 0
+  set frictional_unemployement_time 0                                                   ; Cumulated delay before finding a job for those actively seeking one
+  set frictional_unemployement_rate 0                                                   ; Average delay to find a job when looking for one
+  set structural_unemployement 0                                                        ; Number of mismatch between potential employees and potential employers each turn
+  set natural_unemployement 0                                                           ; Global unemployement level 
   
-  set structural_unemployement 0
-  set natural_unemployement 0
+  set count_unemployed_total 0                                                          ; Number total of unemployed agents person
   
-  set count_unemployed_total 0
-  
-  set people_matched_this_turn 0
+  set people_matched_this_turn 0                                                        ; Number of agents person which find a job this turn
  
-  set unemployement_rate_list []
-  set vacancy_rate_list []
+  set unemployement_rate_list []                                                        ; Here we store the unemployed rate and the vacancy rate 
+  set vacancy_rate_list []                                                              ; over several ticks in a "sliding window" fashion  
   
 end
 
 
-  ;set time_window time_window_ DO NOT FORGET THIS ONE
+; Report the sliders variables to the simulation's variable (for advanced simulations)
+;to setup_sliders_simulations
+  
+;  set time_window time_window_                 ; size of the sliding window to compute moving mean(s)
+  
+;end
 
-to setup_sliders_2; Report the sliders variables to the simulation's variable (Advanced model)
-  ;; SLIDER
-  
-  
-end
-; initialise les skills (utilisable par les agents PERSONS et COMPANIES)
+; Initialize the skills of the agents (person or company)
 to setup_skills
   set skills array:from-list n-values n_skills [0]
   foreach (n-values n_skills [?]) [
-    array:set skills ? (random 2) 
+    array:set skills ? (random 2)              ; skill here can only take 2 values which are set randomly
   ]
 end
 
-; initalise les salaire (utilisable par les agents PERSONS et COMPANIES)
+; Initialize the salary looked for by the agents (person or company)
 to setup_salary
   let random_variation (random salaryMaxFluctu)
   set salary (salaryMean + random_variation)
