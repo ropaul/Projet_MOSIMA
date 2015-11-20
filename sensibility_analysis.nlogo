@@ -45,6 +45,7 @@ to setup_sliders_globals
   set time_window time_windows_
   set n_ticks_max n_ticks_max_
   set epsilon epsilon_
+  set stop_simulations_ stop_simulations
   
   set sensibility_parameter_1 sensibility_parameter_1_           
   set min_param_1 min List min_param_1_ max_param_1_                      
@@ -484,10 +485,10 @@ Number
 SWITCH
 513
 448
-668
+698
 481
-stop_simulations
-stop_simulations
+stop_simulations_
+stop_simulations_
 1
 1
 -1000

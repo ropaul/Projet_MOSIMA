@@ -5,6 +5,8 @@ to setup
   
   setup_sliders_globals ; Use the slider's value in the graphical interface
   setup_simulation           ; Initialize the simulation variable
+  
+  reset-ticks
 end
 
 to go 

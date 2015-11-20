@@ -86,6 +86,7 @@ globals[
   epsilon                          ; Maximum deviation from the moving mean(s) allowed
   VacancyRateList_simulations      ; Final vacancy_rate values over simulations  
   UnemployedRateList_simulations   ; Final unemployement_rate values over simulations  
+  stop_simulations                 ; Emergency stop when simulations are running non-interactively
   
   
   ; Sensitivity analysis variables:
