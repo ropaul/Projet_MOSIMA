@@ -39,3 +39,34 @@ to update_frictional_unemployment [time]
     set frictional_unemployement_rate (frictional_unemployement_time / people_matched_this_turn)
   ]
 end
+
+
+ 
+; Check the convergence (in a less than "epsilon" distance from the moving mean) of the vacancy and unemployement rate
+to-report hasConverged_Vacancy_and_unemployement 
+  ifelse (ticks > time_window)   
+  [
+    ; Moving mean are computed to be compared to
+    let vac_mean mean vacancy_rate_list  
+    let unemp_mean mean unemployement_rate_list
+    let canConverge True
+    let index 0
+    
+    ; Then all the stored value are check
+    while [canConverge and index < time_window] ; As soon as one of them if farer than epsilon from the mean, the convergence is lost
+    [
+      let conv_vac ((abs (item index vacancy_rate_list) - vac_mean) < epsilon)           ; Both distance from the vacancy rate mean
+      let conv_unemp ((abs (item index unemployement_rate_list) - unemp_mean) < epsilon) ; and the unemployement rate mean are checked
+      
+      set canConverge (conv_vac and conv_unemp)
+      set index (index + 1)
+    ] 
+    report canConverge
+  ]
+  [
+    report False
+  ]    
+end
+
+
+

@@ -21,3 +21,98 @@ to go_color
     ask persons [set color white]
   ]
 end
+
+to show_sensitivity [value_param_3]
+  set-current-plot "Sensitivity analysis"
+  
+  create-temporary-plot-pen (word "Param 3 = " precision value_param_3 2)  
+  set-plot-pen-color basic_maping_to_rgb value_param_3 min_param_3 max_param_3
+  
+  if (VacancyRateList_simulations != 0 and UnemployedRateList_simulations != 0) [
+    if (length VacancyRateList_simulations > 0 and length UnemployedRateList_simulations > 0) [  
+      set-plot-pen-mode 2
+      foreach (n-values (length UnemployedRateList_simulations) [?] )[       
+        plotxy (item ? UnemployedRateList_simulations) (item ? VacancyRateList_simulations) 
+      ]
+    ]
+    
+    
+  if (VacancyRateList_simulations != 0 and UnemployedRateList_simulations != 0 and length VacancyRateList_simulations > 1 and length UnemployedRateList_simulations > 1) [
+    
+    let temp_list best_fit UnemployedRateList_simulations VacancyRateList_simulations
+    let a (item 0 temp_list)
+    let b (item 1 temp_list)    
+    
+    create-temporary-plot-pen (word "Param 3 = " precision value_param_3 2 " -- fit")      
+    set-plot-pen-color basic_maping_to_rgb value_param_3 min_param_3 max_param_3
+    plot-pen-reset
+    
+    set-plot-pen-mode 0  
+    let i 0.0001    
+    while [i < 1.3] [
+      if ( (a * (ln i) + b) < ln (1.3 * ceiling (max VacancyRateList_simulations))) [ ; To avoid unnecessary overflow
+        plotxy ( i) ( e ^ (a * (ln i) + b))  
+      ]
+      set i i + 0.01      
+    ]
+    
+    set-plot-y-range 0 (precision (1.2 * ceiling (max VacancyRateList_simulations)) 1)
+    set-plot-x-range 0 (precision (1.2 * ceiling (max UnemployedRateList_simulations)) 1)
+    ]
+  ]
+  
+  
+end
+
+; It use three overlapping triangles, blue green and red, to assign rgb component to a scalar
+to-report basic_maping_to_rgb [val min_val max_val]
+  let normalized_value (val - min_val) / (max_val - min_val)
+  let redComponent 0
+  let greenComponent 0
+  let blueComponent 0
+  
+  
+  ifelse normalized_value <= 0.5 [
+    set redComponent 0
+    set blueComponent 255 * ( 1 - 2 * normalized_value) 
+    set greenComponent 255 * 2 * normalized_value
+  ]
+  [ 
+    set redComponent 255 * (2 * normalized_value - 1)
+    set blueComponent 0 
+    set greenComponent 255 * 2 * (1 - normalized_value)
+  ]
+  
+  report approximate-rgb redComponent greenComponent blueComponent
+end
+
+; Best fit compute a least square regression implemented according to "http://math.unice.fr/~diener/MAB07/MCO.pdf"
+; As the curve is assumed to be exponential, we switch to a logarithmic space to perform the least square regression
+to-report best_fit [list1 list2]
+  if (length list1 > 1 and length list2 > 1) [ 
+    let list1_mean (mean (map [ln ?] list1)) 
+    let list2_mean (mean (map [ln ?] list2))
+    let diff_v 0
+    let diff_u 0
+    let somme_diff_u 0
+    let UxV 0
+    let a  0
+    let b 0
+    foreach (n-values (length list1) [?] )[  
+      set diff_u (ln ( item ? list1) - list1_mean)
+      set diff_v (ln ( item ? list2) - list2_mean)
+      set somme_diff_u (somme_diff_u + ( diff_u * diff_u)) 
+      set a (a + (diff_u * diff_v))
+    ]
+    set somme_diff_u somme_diff_u 
+    if (somme_diff_u != 0) [
+      set a  (a / somme_diff_u)
+      set b ( list2_mean - ( a * list1_mean))
+      
+    ]
+    report (List a b)
+  ]
+  report (List 0 0)
+end 
+  
+  

@@ -71,25 +71,39 @@ globals[
   count_unemployed_total           ; Number total of unemployed agents person
   unemployement_rate_list          ; unemployement_rate values over time
   vacancy_rate_list                ; vacancy_rate over time
-  
-  
+    
   time_window                      ; Size of the "slidding window" used by the moving mean(s)
+ 
+  unemployement_array_beveridge       ; TODO
+  long_unemployement_array_beveridge  ; TODO
+  happiness_worker_array_beveridge    ; TODO
+  happiness_companies_array_beveridge ; TODO
   
  ; Multiple simulations variables:
  
-  maxNumberPerson                  ; Maximum number of agent PERSON in all the simulations
-  minNumberPerson                  ; Minimum number of agent PERSON in all the simulations
-  stepNumberPerson                 ; Step used to describe the possible numbers of agents PERSON
-  rangeNumberPerson                ; List of all the possible numbers of agents PERSON
-  maxNumberCompanies               ; Maximum number of agent COMPANY in all the simulations
-  minNumberCompanies               ; Minimum number of agent COMPANY in all the simulations
-  stepNumberCompanies              ; Step used to describe the possible numbers of agents COMPANY
-  rangeNumberCompanies             ; List of all the possible numbers of agents COMPANY
-  
+  n_sub_simu                       ; Number of simulation averaged to get one statistic value
   n_ticks_max                      ; Maximum number of tick in a simulation
   epsilon                          ; Maximum deviation from the moving mean(s) allowed
   VacancyRateList_simulations      ; Final vacancy_rate values over simulations  
   UnemployedRateList_simulations   ; Final unemployement_rate values over simulations  
+  
+  
+  ; Sensitivity analysis variables:
+  sensibility_parameter_1          ; Name of the first parameter of the sensitivity analysis
+  min_param_1                      ; Minimum value of the first parameter
+  max_param_1                      ; Maximum value of the first parameter
+  step_param_1                     ; Step used to describe all the possible values of the first parameter
+  range_param_1                    ; List of all the possible values of the first parameter
+  sensibility_parameter_2          ; As previously but for the second parameter of the sensitivity analysis
+  min_param_2                      ;
+  max_param_2                      ;
+  step_param_2                     ;
+  range_param_2                    ;
+  sensibility_parameter_3          ; As previously but for the third parameter of the sensitivity analysis
+  min_param_3                      ;
+  max_param_3                      ;
+  step_param_3                     ;
+  range_param_3                    ;
 ]
 
 matchings-own [
@@ -107,7 +121,18 @@ matchings-own [
 to setup_simulation
   
   random-seed Rseed  
-  setup_globals ; 
+  setup_globals 
+  setup_persons
+  setup_companies
+  setup_matching
+  
+  reset-ticks 
+end 
+
+; Same function witthout the globals settings
+to setup_simulation_without_globals
+  
+  random-seed Rseed  
   setup_persons
   setup_companies
   setup_matching
@@ -217,6 +242,75 @@ end
 ;  set time_window time_window_                 ; size of the sliding window to compute moving mean(s)
   
 ;end
+
+; Create the range of values for the three sensitivity parameters
+to setup_range_sensitivity_analysis
+  
+  set range_param_1 []
+  if sensibility_parameter_1 != "NOTHING" [
+    let n_param_1 (1 + ((max_param_1 - min_param_1) / step_param_1))
+    foreach (n-values n_param_1 [?])[
+      set range_param_1 lput (min_param_1 + ? * step_param_1) range_param_1
+    ]
+  ]
+  
+  set range_param_2 []
+  if sensibility_parameter_2 != "NOTHING" [
+    let n_param_2 (1 + ((max_param_2 - min_param_2) / step_param_2))
+    foreach (n-values n_param_2 [?])[
+      set range_param_2 lput (min_param_2 + ? * step_param_2) range_param_2
+    ]
+  ]
+  
+  set range_param_3 []
+  if sensibility_parameter_3 != "NOTHING" [
+    let n_param_3 (1 + ((max_param_3 - min_param_3) / step_param_3))
+    foreach (n-values n_param_3 [?])[
+      set range_param_3 lput (min_param_3 + ? * step_param_3) range_param_3
+    ]
+  ]
+end
+
+
+; Match the argument "name" and its evaluation "value" to its corresponding variable in the simulation
+to match_sensibility_name_variable [name value]
+  if name = "Number of persons" [
+   set Person_Number value 
+  ]
+  if name = "Number of companies" [
+   set Compagny_Number value 
+  ]
+  if name = "Exceptional matching" [
+   set exceptional_matching value 
+  ]
+  if name = "Matching quality threshold" [
+   set matching_quality_threshold value 
+  ]
+  if name = "Firing quality threshold" [
+   set firing_quality_threshold value 
+  ]
+  if name = "Salary maximum fluctuation" [
+   set salaryMaxFluctu value 
+  ]
+  if name = "Salary mean" [
+   set salaryMean value 
+  ]
+  if name = "Unexpected company motivation" [
+   set unexpected_company_motivation value 
+  ]
+  if name = "Unexpeted worker motivation" [
+   set unexpected_worker_motivation value 
+  ]
+  if name = "Maximum productivity fluctuation" [
+   set max_productivity_fluctuation value 
+  ]
+  if name = "Number of different skills" [
+    set n_skills value
+  ]
+  if name = "Unexpected firing" [
+    set unexpected_firing value
+  ]
+end
 
 ; Initialize the skills of the agents (person or company)
 to setup_skills

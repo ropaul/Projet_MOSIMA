@@ -119,7 +119,7 @@ to go_globals
   set natural_unemployement ( frictional_unemployement_rate  + structural_unemployement) ; Global unemployement level 
   
                                                                                          ; Here we store the unemployed rate and the vacancy rate over several ticks in a "sliding window" fashion
-  ifelse (time_window <= 0 or ticks < time_window) [                                                           ; When not enough values are strored, it keep storing them
+  ifelse (time_window <= 0 or ticks < time_window) [                                     ; When not enough values are strored, it keep storing them
     set unemployement_rate_list lput unemployement_rate unemployement_rate_list
     set vacancy_rate_list lput vacancy_rate vacancy_rate_list
   ]
@@ -127,6 +127,115 @@ to go_globals
     set unemployement_rate_list lput unemployement_rate but-first unemployement_rate_list
     set vacancy_rate_list lput vacancy_rate but-first  vacancy_rate_list
   ]
+end
+
+to go_simulations
+  
+  let index 1
+  let value_param_1 0
+  let value_param_2 0
+  let value_param_3 0
+  
+  set unemployement_array_beveridge []
+  set long_unemployement_array_beveridge []
+  set happiness_worker_array_beveridge []
+  set happiness_companies_array_beveridge []
+  
+  
+  foreach (n-values (max list 1 length range_param_3) [?])[             ; The third parameter is updated in the first loop for clarity purpose at the drawing time    
+    if length range_param_3 > 0 [      
+      set value_param_3 (item ? range_param_3)
+    ]
+    show range_param_3
+    
+    set UnemployedRateList_simulations []                               ; New lists are used to store results with each value of the third parameter
+    set UnemployedRateList_simulations []
+    
+    foreach (n-values (max list 1 length range_param_1) [?])[  
+      if length range_param_1 > 0 [
+        set value_param_1 (item ? range_param_1)
+      ]
+      foreach (n-values (max list 1 length range_param_2) [?])[ 
+        if length range_param_2 > 0 [
+          set value_param_2 (item ? range_param_2)
+        ]
+        
+        print "===================================================================="   
+        if sensibility_parameter_1 != "NOTHING" [
+          print (word "The value of (" sensibility_parameter_1 ") will be " value_param_1)        
+        ]
+        if sensibility_parameter_2 != "NOTHING" [
+          print (word "The value of (" sensibility_parameter_2 ") will be " value_param_2)        
+        ]
+        if sensibility_parameter_3 != "NOTHING" [
+          print (word "The value of (" sensibility_parameter_3 ") will be " value_param_3)        
+        ]
+        
+        
+   
+                                                          ; Accumulators to compute average moving means
+        let vac_rate 0                                    ; vacancy rate
+        let unem_rate 0                                   ; unemployement rate
+        
+                                                          ;for sensibility of parameters
+        let happy_work 0                                  ; 
+        let happy_comp 0
+        let long_unemp 0
+        let short_unemp 0     
+        
+        foreach (n-values n_sub_simu [?]) [  ; simulations will be repeated "n_sub_simu" times with different random seed       
+          
+          
+          ask turtles [die]  
+          set Rseed ? 
+          
+          if sensibility_parameter_1 != "NOTHING" [
+            match_sensibility_name_variable sensibility_parameter_1 value_param_1
+          ]
+          if sensibility_parameter_2 != "NOTHING" [
+            match_sensibility_name_variable sensibility_parameter_2 value_param_2
+          ]
+          if sensibility_parameter_3 != "NOTHING" [
+            match_sensibility_name_variable sensibility_parameter_3 value_param_3
+          ]
+          
+          setup_simulation
+          
+          
+          
+          while [ticks < n_ticks_max and not hasConverged_Vacancy_and_unemployement] [ ; The simulation will stop either if it has converged or run for too long
+            
+            go_simulation  
+            if stop_simulations [  
+              stop
+            ]
+          ]                                                          ; the simulation is stopped
+          
+          set vac_rate (vac_rate + (mean vacancy_rate_list))                           ; Moving mean are accumulated
+          set unem_rate (unem_rate + (mean unemployement_rate_list))
+          
+          
+          ;set happy_work happy_work + (mean happiness_worker_array)
+          ;set happy_comp happy_comp + (mean happiness_companies_array)
+          ;set long_unemp long_unemp + (mean long_unemployement_array)
+          ;set short_unemp short_unemp + (mean unemployement_array)
+        ]
+        ; True mean (over the "n_sub_simu" are now computed and stored
+        set VacancyRateList_simulations lput (vac_rate / n_sub_simu) VacancyRateList_simulations
+        set UnemployedRateList_simulations lput (unem_rate / n_sub_simu) UnemployedRateList_simulations
+        
+        set unemployement_array_beveridge lput( short_unemp / n_sub_simu) unemployement_array_beveridge
+        set long_unemployement_array_beveridge lput ( long_unemp / n_sub_simu) long_unemployement_array_beveridge
+        set happiness_worker_array_beveridge lput  ( happy_work / n_sub_simu) happiness_worker_array_beveridge
+        set happiness_companies_array_beveridge lput ( happy_comp / n_sub_simu) happiness_companies_array_beveridge
+        
+        set index (index + 1)
+        
+        show_sensitivity value_param_3
+      ] ; end of the param_2 loop
+      
+    ] ; end of the param_1 loop
+  ] ; end of the param_3 loop
 end
 
 

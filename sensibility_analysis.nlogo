@@ -1,19 +1,29 @@
-__includes["code/go.nls"  "code/setup.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls"] 
+__includes[ "code/setup.nls" "code/go.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls"] 
 
 to setup    
   clear-all  
   
-  setup_sliders_globals ; Use the slider's value in the graphical interface
-  setup_simulation           ; Initialize the simulation variable
+  setup_sliders_globals            ; Use the slider's value in the graphical interface
+  setup_range_sensitivity_analysis ; Create the search space for the sensitivity analysis
+  
+  set VacancyRateList_simulations []
+  set UnemployedRateList_simulations []
+  
+  setup_simulation
+  reset-ticks
 end
 
 to go 
-  go_simulation ; run the simulation
+  go_simulations                   ; run the simulations
+  
+  if stop_simulations [  
+    stop
+  ]
 end
 
 
 
-; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) 
+; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) (only for the base model)
 to setup_sliders_globals
   
   set salaryMean salaryMean_                       
@@ -30,6 +40,26 @@ to setup_sliders_globals
   set Person_Number Person_Number_
   set Compagny_Number Compagny_Number_
   set Rseed Rseed_
+  
+  set n_sub_simu n_sub_simu_
+  set time_window time_windows_
+  set n_ticks_max n_ticks_max_
+  set epsilon epsilon_
+  
+  set sensibility_parameter_1 sensibility_parameter_1_           
+  set min_param_1 min List min_param_1_ max_param_1_                      
+  set max_param_1 max List min_param_1_ max_param_1_                     
+  set step_param_1 step_param_1_   
+  
+  set sensibility_parameter_2 sensibility_parameter_2_           
+  set min_param_2 min List min_param_2_ max_param_2_                      
+  set max_param_2 max List min_param_2_ max_param_2_                     
+  set step_param_2 step_param_2_    
+  
+  set sensibility_parameter_3 sensibility_parameter_3_           
+  set min_param_3 min List min_param_3_ max_param_3_                       
+  set max_param_3 max List min_param_3_ max_param_3_                     
+  set step_param_3 step_param_3_     
  
 end
 @#$#@#$#@
@@ -69,7 +99,7 @@ Person_Number_
 Person_Number_
 0
 500
-100
+300
 10
 1
 NIL
@@ -84,17 +114,17 @@ Compagny_Number_
 Compagny_Number_
 0
 500
-150
+300
 10
 1
 NIL
 HORIZONTAL
 
 BUTTON
-375
-539
-458
-587
+282
+443
+365
+491
 NIL
 setup
 NIL
@@ -108,13 +138,13 @@ NIL
 1
 
 BUTTON
-504
-540
-583
-589
+382
+444
+461
+493
 NIL
 go
-T
+NIL
 1
 T
 OBSERVER
@@ -123,27 +153,6 @@ NIL
 NIL
 NIL
 0
-
-PLOT
-710
-520
-1272
-711
-Market situation
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-true
-"" ""
-PENS
-"Unemployed people" 1.0 0 -13345367 true "" "plot count persons with [not haveJob]"
-"Vacant job" 1.0 0 -2674135 true "" "plot count companies with [not haveEmployee]"
-"Company waiting list" 1.0 0 -8053223 true "" "plot length [seekC] of matching matchingAgentWhoNumber"
-"Person waiting list" 1.0 0 -15390905 true "" "plot length [seekP] of matching matchingAgentWhoNumber"
 
 SLIDER
 6
@@ -169,7 +178,7 @@ salaryMaxFluctu_
 salaryMaxFluctu_
 0
 100
-17
+19
 1
 1
 NIL
@@ -289,7 +298,7 @@ firing_quality_threshold_
 firing_quality_threshold_
 0
 1
-0.2
+0.3
 0.1
 1
 NIL
@@ -304,7 +313,7 @@ max_productivity_fluctuation_
 max_productivity_fluctuation_
 0
 1
-0.4
+0.3
 0.1
 1
 NIL
@@ -343,66 +352,233 @@ colorVisible
 1
 -1000
 
-MONITOR
-795
-244
-884
-289
-vacancy_rate
-vacancy_rate
-17
+CHOOSER
+277
+510
+464
+555
+sensibility_parameter_1_
+sensibility_parameter_1_
+"Number of persons" "Number of companies" "Exceptional matching" "Matching quality threshold" "Maximum productivity fluctuation" "Firing quality threshold" "Unexpected firing" "Salary maximum fluctuation" "Salary mean" "Unexpected company motivation" "Unexpeted worker motivation" "Number of different skills" "NOTHING"
 1
-11
+
+CHOOSER
+274
+584
+464
+629
+sensibility_parameter_2_
+sensibility_parameter_2_
+"Number of persons" "Number of companies" "Exceptional matching" "Matching quality threshold" "Maximum productivity fluctuation" "Firing quality threshold" "Unexpected firing" "Salary maximum fluctuation" "Salary mean" "Unexpected company motivation" "Unexpeted worker motivation" "Number of different skills" "NOTHING"
+0
+
+CHOOSER
+277
+651
+467
+696
+sensibility_parameter_3_
+sensibility_parameter_3_
+"Number of persons" "Number of companies" "Exceptional matching" "Matching quality threshold" "Maximum productivity fluctuation" "Firing quality threshold" "Unexpected firing" "Salary maximum fluctuation" "Salary mean" "Unexpected company motivation" "Unexpeted worker motivation" "Number of different skills" "NOTHING"
+6
+
+INPUTBOX
+470
+502
+560
+562
+min_param_1_
+100
+1
+0
+Number
+
+INPUTBOX
+564
+502
+650
+562
+max_param_1_
+500
+1
+0
+Number
+
+INPUTBOX
+654
+502
+740
+562
+step_param_1_
+100
+1
+0
+Number
+
+INPUTBOX
+471
+572
+561
+632
+min_param_2_
+100
+1
+0
+Number
+
+INPUTBOX
+565
+572
+652
+632
+max_param_2_
+500
+1
+0
+Number
+
+INPUTBOX
+655
+572
+741
+632
+step_param_2_
+100
+1
+0
+Number
+
+INPUTBOX
+472
+640
+560
+700
+min_param_3_
+0
+1
+0
+Number
+
+INPUTBOX
+565
+641
+652
+701
+max_param_3_
+0.4
+1
+0
+Number
+
+INPUTBOX
+656
+641
+742
+701
+step_param_3_
+0.05
+1
+0
+Number
+
+SWITCH
+513
+448
+668
+481
+stop_simulations
+stop_simulations
+1
+1
+-1000
+
+SLIDER
+700
+233
+835
+266
+time_windows_
+time_windows_
+0
+100
+100
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+701
+193
+835
+226
+n_ticks_max_
+n_ticks_max_
+100
+1500
+1500
+10
+1
+NIL
+HORIZONTAL
+
+SLIDER
+701
+275
+834
+308
+epsilon_
+epsilon_
+0
+0.3
+0.1
+0.05
+1
+NIL
+HORIZONTAL
 
 MONITOR
-930
-246
-1061
-291
-unemployement_rate
-unemployement_rate
-17
+704
+139
+761
+184
+NIL
+Rseed
+2
 1
 11
 
 PLOT
-709
-295
-1270
-508
-Unemployements
-NIL
-NIL
+855
+10
+1562
+626
+Sensitivity analysis
+Unemployement rate
+Vacancy rate
 0.0
-10.0
-0.0
-10.0
-true
-true
-"" ""
-PENS
-"Natural unemployement" 1.0 0 -16777216 true "" "plot natural_unemployement"
-"Frictional unemployement" 1.0 0 -14070903 true "" "plot frictional_unemployement_rate"
-"Strucutural unemployement" 1.0 0 -15302303 true "" "plot structural_unemployement"
-
-PLOT
-709
-18
-1270
-241
-Rates
-NIL
-NIL
-0.0
-10.0
+1.0
 0.0
 1.0
 true
 true
 "" ""
 PENS
-"Unemployed rate" 1.0 0 -11783835 true "" "plot unemployement_rate"
-"Vacancy rate" 1.0 0 -8053223 true "" "plot vacancy_rate"
+
+SLIDER
+701
+311
+834
+344
+n_sub_simu_
+n_sub_simu_
+1
+20
+3
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
