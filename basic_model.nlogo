@@ -32,6 +32,8 @@ to setup_sliders_globals
   set Person_Number Person_Number_
   set Compagny_Number Compagny_Number_
   set Rseed Rseed_
+  
+  set time_window time_window_
  
 end
 @#$#@#$#@
@@ -93,10 +95,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-375
-539
-458
-587
+382
+448
+465
+496
 NIL
 setup
 NIL
@@ -110,10 +112,10 @@ NIL
 1
 
 BUTTON
-504
-540
-583
-589
+511
+449
+590
+498
 NIL
 go
 T
@@ -129,7 +131,7 @@ NIL
 PLOT
 710
 520
-1272
+1367
 711
 Market situation
 NIL
@@ -370,7 +372,7 @@ unemployement_rate
 PLOT
 709
 295
-1270
+1366
 508
 Unemployements
 NIL
@@ -390,7 +392,7 @@ PENS
 PLOT
 709
 18
-1270
+1367
 241
 Rates
 NIL
@@ -404,7 +406,24 @@ true
 "" ""
 PENS
 "Unemployed rate" 1.0 0 -11783835 true "" "plot unemployement_rate"
-"Vacancy rate" 1.0 0 -8053223 true "" "plot vacancy_rate"
+"Moving mean unemployed rate" 1.0 0 -8630108 true "" "moving_mean unemployement_rate_list"
+"Vacancy rate" 1.0 0 -2674135 true "" "plot vacancy_rate"
+"Moving mean vacancy rate" 1.0 0 -2139308 true "" "moving_mean vacancy_rate_list"
+
+SLIDER
+1092
+250
+1215
+283
+time_window_
+time_window_
+0
+50
+20
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
