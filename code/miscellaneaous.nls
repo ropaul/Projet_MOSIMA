@@ -20,6 +20,7 @@ to hire_employee [the_person]
   set people_matched_this_turn (people_matched_this_turn + 1)
   set haveEmployee True
   set employee the_person
+  set time_unemployee 0 ;
   if colorVisible [set color green]   ; HERE CHANGE OF COLOR
   ask the_person [    
     set haveJob True

@@ -29,6 +29,9 @@ companies-own[
   skills                 ; The skill needed for its job
   salary                 ; The proposed salary
   employee               ; Its potential employee
+  
+   ; Statistics variables:
+  time_unemployee         ; store the time since the last employee
 ]
 
 
@@ -74,10 +77,6 @@ globals[
     
   time_window                      ; Size of the "slidding window" used by the moving mean(s)
  
-  unemployement_array_beveridge       ; TODO
-  long_unemployement_array_beveridge  ; TODO
-  happiness_worker_array_beveridge    ; TODO
-  happiness_companies_array_beveridge ; TODO
   
  ; Multiple simulations variables:
  
@@ -105,6 +104,29 @@ globals[
   max_param_3                      ;
   step_param_3                     ;
   range_param_3                    ;
+  
+  ; to calculate the differetns plots
+  number_array_max
+  unemployement_array
+  long_unemployement_array
+  happiness_worker_array
+  happiness_companies_array
+  
+  unemployement_array_beveridge  
+  long_unemployement_array_beveridge  
+  happiness_worker_array_beveridge    
+  happiness_companies_array_beveridge
+  
+ unemployement_array_parameter
+ long_unemployement_array_parameter
+ happiness_worker_array_parameter
+ happiness_companies_array_parameter
+  
+  
+  
+  
+  index_go
+  update_plot
 ]
 
 matchings-own [
@@ -175,6 +197,7 @@ to setup_companies
     set employee nobody                   ;    employer
     setup_skills                          ;    personal skills
     setup_salary                          ;    desired salary
+    set time_unemployee 0   
   ]
 end
 
@@ -234,6 +257,13 @@ to setup_globals
   set unemployement_rate_list []                                                        ; Here we store the unemployed rate and the vacancy rate 
   set vacancy_rate_list []                                                              ; over several ticks in a "sliding window" fashion  
   
+  
+  set number_array_max  20 ;; how many value we stock in arrays
+ set unemployement_array  []
+ set long_unemployement_array []
+ set happiness_worker_array []
+ set happiness_companies_array []
+  
 end
 
 
@@ -246,7 +276,7 @@ end
 
 ; Create the range of values for the three sensitivity parameters
 to setup_range_sensitivity_analysis
-  
+  set update_plot false
   set range_param_1 []
   if sensibility_parameter_1 != "NOTHING" [
     let n_param_1 (1 + ((max_param_1 - min_param_1) / step_param_1))
@@ -325,4 +355,53 @@ end
 to setup_salary
   let random_variation (random salaryMaxFluctu)
   set salary (salaryMean + random_variation)
+end
+
+
+
+
+
+
+
+
+
+; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) (only for the base model)
+to setup_sliders_globals
+  
+  set salaryMean salaryMean_                       
+  set salaryMaxFluctu salaryMaxFluctu_            
+  set n_skills n_skills_
+  set n_match n_match_ 
+  set matching_quality_threshold matching_quality_threshold_ 
+  set exceptional_matching exceptional_matching_ 
+  set unexpected_company_motivation unexpected_company_motivation_ 
+  set unexpected_worker_motivation unexpected_worker_motivation_ 
+  set unexpected_firing  unexpected_firing_ 
+  set firing_quality_threshold firing_quality_threshold_ 
+  set max_productivity_fluctuation max_productivity_fluctuation_  
+  set Person_Number Person_Number_
+  set Compagny_Number Compagny_Number_
+  set Rseed Rseed_
+  
+  set n_sub_simu n_sub_simu_
+  set time_window time_windows_
+  set n_ticks_max n_ticks_max_
+  set epsilon epsilon_
+  set stop_simulations stop_simulations_
+  
+  set sensibility_parameter_1 sensibility_parameter_1_           
+  set min_param_1 min List min_param_1_ max_param_1_                      
+  set max_param_1 max List min_param_1_ max_param_1_                     
+  set step_param_1 step_param_1_   
+  
+  set sensibility_parameter_2 sensibility_parameter_2_           
+  set min_param_2 min List min_param_2_ max_param_2_                      
+  set max_param_2 max List min_param_2_ max_param_2_                     
+  set step_param_2 step_param_2_    
+  
+  set sensibility_parameter_3 sensibility_parameter_3_           
+  set min_param_3 min List min_param_3_ max_param_3_                       
+  set max_param_3 max List min_param_3_ max_param_3_                     
+  set step_param_3 step_param_3_     
+ 
 end

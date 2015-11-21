@@ -1,4 +1,4 @@
-__includes[ "code/setup.nls" "code/go.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls"] 
+__includes[ "code/setup.nls" "code/go.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls" "code/plot.nls"] 
 
 to setup    
   clear-all  
@@ -10,58 +10,20 @@ to setup
   set UnemployedRateList_simulations []
   
   setup_simulation
+  set unemployement_array_parameter []
+     set long_unemployement_array_parameter []
+     set happiness_worker_array_parameter []
+     set happiness_companies_array_parameter []
+    
   reset-ticks
 end
 
 to go 
   go_simulations                   ; run the simulations
   
-  if stop_simulations [  
+  if stop_simulations_ [  
     stop
   ]
-end
-
-
-
-; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) (only for the base model)
-to setup_sliders_globals
-  
-  set salaryMean salaryMean_                       
-  set salaryMaxFluctu salaryMaxFluctu_            
-  set n_skills n_skills_
-  set n_match n_match_ 
-  set matching_quality_threshold matching_quality_threshold_ 
-  set exceptional_matching exceptional_matching_ 
-  set unexpected_company_motivation unexpected_company_motivation_ 
-  set unexpected_worker_motivation unexpected_worker_motivation_ 
-  set unexpected_firing  unexpected_firing_ 
-  set firing_quality_threshold firing_quality_threshold_ 
-  set max_productivity_fluctuation max_productivity_fluctuation_  
-  set Person_Number Person_Number_
-  set Compagny_Number Compagny_Number_
-  set Rseed Rseed_
-  
-  set n_sub_simu n_sub_simu_
-  set time_window time_windows_
-  set n_ticks_max n_ticks_max_
-  set epsilon epsilon_
-  set stop_simulations_ stop_simulations
-  
-  set sensibility_parameter_1 sensibility_parameter_1_           
-  set min_param_1 min List min_param_1_ max_param_1_                      
-  set max_param_1 max List min_param_1_ max_param_1_                     
-  set step_param_1 step_param_1_   
-  
-  set sensibility_parameter_2 sensibility_parameter_2_           
-  set min_param_2 min List min_param_2_ max_param_2_                      
-  set max_param_2 max List min_param_2_ max_param_2_                     
-  set step_param_2 step_param_2_    
-  
-  set sensibility_parameter_3 sensibility_parameter_3_           
-  set min_param_3 min List min_param_3_ max_param_3_                       
-  set max_param_3 max List min_param_3_ max_param_3_                     
-  set step_param_3 step_param_3_     
- 
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -489,7 +451,7 @@ SWITCH
 481
 stop_simulations_
 stop_simulations_
-1
+0
 1
 -1000
 
@@ -553,7 +515,7 @@ PLOT
 855
 10
 1562
-626
+310
 Sensitivity analysis
 Unemployement rate
 Vacancy rate
@@ -576,6 +538,42 @@ n_sub_simu_
 1
 20
 3
+1
+1
+NIL
+HORIZONTAL
+
+PLOT
+856
+319
+1561
+677
+measures
+Param 3
+%
+0.0
+0.1
+0.0
+0.1
+true
+true
+"" ""
+PENS
+"Unemployed" 1.0 0 -15390905 true "" "unemployement_param3"
+"Long time unemployed" 1.0 0 -13210332 true "" "long_unemployement_param3"
+"Happiness worker" 1.0 0 -2674135 true "" "happiness_worke_param3"
+"Happines companies" 1.0 0 -955883 true "" "happiness_companies_param3"
+
+SLIDER
+859
+692
+1036
+725
+long_time_unemployed
+long_time_unemployed
+0
+50
+10
 1
 1
 NIL

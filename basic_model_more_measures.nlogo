@@ -1,4 +1,4 @@
-__includes["code/go.nls"  "code/setup.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls"] 
+__includes["code/go.nls"  "code/setup.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls" "code/plot.nls"] 
 
 to setup    
   clear-all  
@@ -130,9 +130,9 @@ NIL
 
 PLOT
 710
-520
+555
 1367
-711
+746
 Market situation
 NIL
 NIL
@@ -145,9 +145,11 @@ true
 "" ""
 PENS
 "Unemployed people" 1.0 0 -13345367 true "" "plot count persons with [not haveJob]"
-"Vacant job" 1.0 0 -2674135 true "" "plot count companies with [not haveEmployee]"
+"Vacant job" 1.0 0 -2674135 true "" "vacancy"
 "Company waiting list" 1.0 0 -8053223 true "" "plot length [seekC] of matching matchingAgentWhoNumber"
 "Person waiting list" 1.0 0 -15390905 true "" "plot length [seekP] of matching matchingAgentWhoNumber"
+"Long time unemployed people" 1.0 0 -14333415 true "" "long_unemployement"
+"Long time Vacancy" 1.0 0 -6995700 true "" "long_vacancy"
 
 SLIDER
 6
@@ -420,6 +422,21 @@ time_window_
 0
 50
 20
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+711
+515
+908
+548
+long_time_unemployed
+long_time_unemployed
+0
+50
+10
 1
 1
 NIL

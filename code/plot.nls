@@ -1,0 +1,100 @@
+;; =================================================================
+;; BASIC MODELE PLOT PROCEDURES
+;; =================================================================
+
+; show the long unemployement in one basic simulation
+to long_unemployement
+  if (Labor_force != 0 ) [ plot ((count persons with [ time_unemployed >= long_time_unemployed ] )  )]
+end
+
+; show the unemployement in one basic simulation
+to unemployement
+   plot count persons with [not haveJob]
+end
+
+; show the vacancy in one basic simulation  
+to vacancy
+  plot count companies with [not haveEmployee]
+end
+
+; show the long vacancy in one basic simulation
+to long_vacancy
+  plot count companies with [time_unemployee >= long_time_unemployed]
+end
+
+;; =================================================================
+;; ANALYLIS PLOT PROCEDURES
+;; =================================================================
+
+
+; show the different beveridge curve for the different value of the param_3
+to show_sensitivity [value_param_3]
+  set-current-plot "Sensitivity analysis"
+  
+  create-temporary-plot-pen (word "Param 3 = " precision value_param_3 2)  
+  set-plot-pen-color basic_maping_to_rgb value_param_3 min_param_3 max_param_3
+  
+  if (VacancyRateList_simulations != 0 and UnemployedRateList_simulations != 0) [
+    if (length VacancyRateList_simulations > 0 and length UnemployedRateList_simulations > 0) [  
+      set-plot-pen-mode 2
+      foreach (n-values (length UnemployedRateList_simulations) [?] )[       
+        plotxy (item ? UnemployedRateList_simulations) (item ? VacancyRateList_simulations) 
+      ]
+    ]
+    
+    
+  if (VacancyRateList_simulations != 0 and UnemployedRateList_simulations != 0 and length VacancyRateList_simulations > 1 and length UnemployedRateList_simulations > 1) [
+    
+    let temp_list best_fit UnemployedRateList_simulations VacancyRateList_simulations
+    let a (item 0 temp_list)
+    let b (item 1 temp_list)    
+    
+    create-temporary-plot-pen (word "Param 3 = " precision value_param_3 2 " -- fit")      
+    set-plot-pen-color basic_maping_to_rgb value_param_3 min_param_3 max_param_3
+    plot-pen-reset
+    
+    set-plot-pen-mode 0  
+    let i 0.0001    
+    while [i < 1.3] [
+      if ( (a * (ln i) + b) < ln (1.3 * ceiling (max VacancyRateList_simulations))) [ ; To avoid unnecessary overflow
+        plotxy ( i) ( e ^ (a * (ln i) + b))  
+      ]
+      set i i + 0.01      
+    ]
+    
+    set-plot-y-range 0 (precision (1.2 * ceiling (max VacancyRateList_simulations)) 1)
+    set-plot-x-range 0 (precision (1.2 * ceiling (max UnemployedRateList_simulations)) 1)
+    ]
+  ]
+end
+
+
+
+to unemployement_param3 
+  if (update_plot = true) [
+    plotxy (item  (index_go - 1) range_param_3) (item  (index_go - 1) unemployement_array_parameter)
+  ]
+  
+end
+
+to long_unemployement_param3 
+  if (update_plot = true) [
+    plotxy (item  (index_go - 1) range_param_3) (item  (index_go - 1) long_unemployement_array_parameter)
+  ]
+  
+end
+to happiness_worke_param3 
+  if (update_plot = true) [
+    plotxy (item  (index_go - 1) range_param_3) (item  (index_go - 1) happiness_worker_array_parameter)
+  ]
+  
+end
+to happiness_companies_param3 
+  if (update_plot = true) [
+    plotxy (item  (index_go - 1) range_param_3) (item  (index_go - 1) happiness_companies_array_parameter)
+    set update_plot false
+  ]
+  
+end
+  
+

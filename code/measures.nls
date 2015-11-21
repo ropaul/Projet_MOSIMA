@@ -65,7 +65,13 @@ to-report similarity_company_to_person[a_company a_person]
 end
 
 
-to persons_happiness
+
+;; =================================================================
+;; HAPINESS PROCEDURES
+;; =================================================================
+
+
+to-report persons_happiness
   let happiness 0
   let numberOfPerson 0 
   ask persons[
@@ -74,13 +80,22 @@ to persons_happiness
       set numberOfPerson numberOfPerson + 1 
     ]
   ]
-  if (numberOfPerson != 0) [
-    plot happiness / numberOfPerson
+  ifelse (numberOfPerson != 0) [
+    set happiness happiness / numberOfPerson
+    report happiness
   ]
+  [
+    report 0
+  ]
+  
 end
 
 
-to companies_happiness
+to persons_happiness_plot
+  plot persons_happiness
+end
+
+to-report companies_happiness
   let happiness 0 
   let numberOfCompanies 0
   ask companies [
@@ -89,9 +104,19 @@ to companies_happiness
       set numberOfCompanies numberOfCompanies + 1
     ]
   ]
-  if (numberOfCompanies != 0 ) [
-    plot happiness /  numberOfCompanies
+  ifelse (numberOfCompanies != 0) [
+    set happiness happiness / numberOfCompanies
+    report happiness
+  ]
+  [
+    report 0
   ]
 end
+
+
+to companies_happiness_plot
+  plot companies_happiness
+end
+
 
 
