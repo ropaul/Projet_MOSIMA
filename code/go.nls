@@ -28,13 +28,31 @@ end
 ; It will first try to find a job.
 to go_person
   
-  if not haveJob [                             ; if the agent person has no job
+  ifelse not haveJob [                             ; if the agent person has no job
+    
+    
+    
     ask matching matchingAgentWhoNumber [      ; it asks for one to the matching agent
-      if not member? ([who] of myself) seekP [ ; which check first if the agent person is already in its list
-        set seekP lput ([who] of myself) seekP ; and eventually add it to it.
-      ]  
+      ifelse (Activate_optimized_matching_ = true)[ ; HERE IF WE USE OPTIMIZED MATCHING
+        if (seekJob?) [
+          if not member? ([who] of myself) seekP [ ; which check first if the agent person is already in its list
+            set seekP lput ([who] of myself) seekP ; and eventually add it to it.
+          ]  
+        ]
+      ]
+      [
+        if not member? ([who] of myself) seekP [ ; which check first if the agent person is already in its list
+          set seekP lput ([who] of myself) seekP ; and eventually add it to it.
+        ] 
+      ] 
     ]
+    
     set time_unemployed time_unemployed + 1    ; At each tick we keep track of the time the agent person was unemployed
+  ]
+  [
+    if (Activate_resignation_ = true) [
+      ifelse (Optimized_resignation_ = true)[optimezed_resign][resign] ; FOR THE RESIGANTION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ]
   ]
   
 end
@@ -70,8 +88,15 @@ to go_matching
   set frictional_unemployement_rate 0
   set frictional_unemployement_time 0
   
-  let n_treated (min (List (length seekP) (length seekC) n_match)) ; It first determines the exact number (n_treated) of agents processed
-                                                                   ;       (it is the minimum number between the matching agent capacity (n_match) and the lists of candidats)
+  
+  ;HERE THE APPENDICE A
+  let n_treated 0
+  ifelse (Activate_appendice_)[
+    set n_treated (min (List (length seekP) (length seekC) M_value)) ; n_treated = la taille minimum entre seekP et seekC ;;;;;;;;;;;;;;;;; ICI QUE L'ON MODIFIE LE NOMBRE DE COUPLE DE MATCHING
+  ]
+  [
+    set n_treated (min (List (length seekP) (length seekC) n_match)) ; It first determines the exact number (n_treated) of agents processed
+  ]                                                                 ;       (it is the minimum number between the matching agent capacity (n_match) and the lists of candidats)
   let unemployed_treated n-of n_treated (shuffle seekP)            ; then it selects some agents in each lists (seekP and seekC)
   let recruitors_treated n-of n_treated (shuffle seekC)            ; and makes sure that they are ordered randomly (shuffle)
   
@@ -82,8 +107,19 @@ to go_matching
     let a_person (person a_person_number)                          ; and we directly use it to manipulate the agent person and the agent company.
     let a_company (company a_company_number) 
     
-    let simi_person (similarity_person_to_company a_person a_company)  ; The similarity between an agent person and an agent company is computed
-    let simi_company (similarity_company_to_person a_company a_person) ; as well as between a company and a person 
+    
+    let simi_person 0
+    let simi_company 0
+    ; HERE IF WE USE OPTIMIZED MATCHING
+    ifelse (Activate_optimized_matching = true)[
+      set simi_person (optimized_similarity_person_to_company a_person a_company)  ; The similarity between an agent person and an agent company is computed
+      set simi_company (optimized_similarity_company_to_person a_company a_person) ; as well as between a company and a person 
+    ]
+    [
+      set simi_person (similarity_person_to_company a_person a_company)  ; The similarity between an agent person and an agent company is computed
+      set simi_company (similarity_company_to_person a_company a_person) ; as well as between a company and a person 
+    ]
+    
     
     let close_enough ((abs (simi_person - simi_company)) <= exceptional_matching)      ; Then it assess that their similiratiies are on the same scale
     let good_enough ( (simi_person + simi_company) / 2 >= matching_quality_threshold ) ; and if they are similar enough to be matched

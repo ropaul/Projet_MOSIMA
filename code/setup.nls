@@ -122,11 +122,18 @@ globals[
  happiness_worker_array_parameter
  happiness_companies_array_parameter
   
-  
-  
-  
   index_go
   update_plot
+  
+  
+  ; extention
+  
+  Activate_optimized_matching_ ; boolean if we activate the optimzed matching
+  M ; for appendice a , the number of couple make / turn
+  Activate_appendice_
+  Activate_resignation_
+  Optimized_resignation_
+  
 ]
 
 matchings-own [

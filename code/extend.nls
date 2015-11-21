@@ -1,0 +1,117 @@
+
+;; =================================================================
+;; OPTIMIZED_MATCHING
+;; =================================================================
+
+; calcul la similarité entre les skills
+to-report optimized_skillSimilarity [skills1 skills2]
+  let accu 0
+  foreach (n-values n_skills [?]) [
+   let skill_of_1 (array:item skills1 ?) 
+   let skill_of_2 (array:item skills2 ?)
+   if (skill_of_1 = skill_of_2) [
+    set accu (accu + 1)  ; regarde si les skill demandé sont les même , si oui , +1
+   ]
+  ]  
+  report (accu / n_skills)
+end 
+
+; calcul la similarité de distance (distance euclidienne)
+to-report optimized_localisationSimilarity [x1 y1 x2 y2]
+  let dist sqrt ((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
+  report   1. - dist / distMax
+end
+
+; calcul la similarité des salaire
+to-report optimized_salarySimilarity [salary1 salary2]
+  let diff (salary1 - salary2)
+  let temp (1. + diff / salaryMax)
+  report  (temp / 2)
+end
+
+; calcul la similarité d'une personne pour une personne
+to-report optimized_similarity_person_to_company[a_person a_company]
+  let accu 0
+  set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company))  * weight_skill_person ; ajout de poid;
+  set accu (accu + localisationSimilarity ([xcor] of a_person) ([ycor] of a_person) ([xcor] of a_company) ([ycor] of a_company)) * weight_distance_person ; ajout de poid
+  set accu (accu + salarySimilarity ([salary] of a_person) ([salary] of a_company))   * weight_salary_person; ajout de poid
+  let motivation (random-float unexpected_worker_motivation)
+  report ( utility_function (accu + motivation) / (utility_function (weight_skill_person + weight_distance_person + weight_salary_person + unexpected_worker_motivation) ))
+end
+
+; calcul la similarité pour une comagnie
+to-report optimized_similarity_company_to_person[a_company a_person]
+  let accu 0
+  set accu (accu + skillSimilarity ([skills] of a_person) ([skills] of a_company)) * weight_skill_companies ; ajout de poid
+  set accu (accu + localisationSimilarity ([xcor] of a_person) ([ycor] of a_person) ([xcor] of a_company) ([ycor] of a_company)) * weight_distance_companies ; ajout de poid
+  set accu (accu + salarySimilarity ([salary] of a_company) ([salary] of a_person)) * weight_salary_companies ; ajout de poid
+  let motivation (random-float unexpected_company_motivation)
+  report ( utility_function (accu + motivation) / (utility_function (( weight_skill_companies + weight_distance_companies + weight_salary_companies ) + unexpected_company_motivation) ) )
+end
+
+
+
+to-report utility_function [number]
+  report 1 / (1 + e ^ (-1 * number))
+end
+
+
+
+
+;; =================================================================
+;; FUNCTION FOR APPENDICE A
+;; =================================================================
+
+
+; si la PERSONS cherche un job ou pas
+to-report seekJob?
+  let rand (random-float 1)
+  ifelse (rand < ( 1 / (1 - s)))[ ; une chance de 1/(1 - s) de ne pas chercher de job à ce tour ci
+      report false  ; non , on ne cherche pas de job
+  ]
+  [
+    report true ; oui , on cherche un job
+  ] 
+end
+  
+to-report M_value
+  go_globals
+  ifelse (Vacancy_rate != 0)[
+    set M vacancy_rate * (1 - e ^ (- 1 * s * Unemployement_rate / Vacancy_rate))
+  ]
+  [
+    set M 0
+  ]
+  report M
+end
+
+
+;; =================================================================
+;; FUNCTION FOR RESIGNATION
+;; =================================================================
+
+
+to resign
+  if (haveJob)[
+    let resign? (random-float 1 )
+    if (resign? < unexpected_resignation)[
+      quit
+    ]
+  ]
+end 
+
+
+to optimezed_resign
+  if (haveJob)[
+    let resign? (similarity_person_to_company self employer) + (productivity [skills] of employer skills )
+    if (resign? < unexpected_resignation)[
+      quit
+    ]
+  ]
+end
+
+to quit
+  let me self
+  if (haveJob)[ ask employer [fire_employee me] ]
+
+end
