@@ -19,6 +19,7 @@ to setup
     set Activate_appendice_ Activate_appendice
     set Activate_resignation_ Activate_resignation
     set Optimized_resignation_ Optimized_resignation
+    set Activate_perspective_ Activate_perspective
     
     
   reset-ticks
@@ -719,10 +720,10 @@ NIL
 HORIZONTAL
 
 TEXTBOX
-730
-735
-880
-753
+703
+729
+853
+747
 Resignation
 11
 0.0
@@ -735,7 +736,7 @@ SWITCH
 784
 Activate_resignation
 Activate_resignation
-0
+1
 1
 -1000
 
@@ -761,9 +762,60 @@ SWITCH
 866
 Optimized_resignation
 Optimized_resignation
+1
+1
+-1000
+
+SLIDER
+927
+794
+1143
+827
+reconvertion_person_rate
+reconvertion_person_rate
+0
+1
+0.1
+0.01
+1
+%
+HORIZONTAL
+
+SWITCH
+924
+751
+1097
+784
+Activate_perspective
+Activate_perspective
 0
 1
 -1000
+
+TEXTBOX
+925
+726
+1075
+744
+Perspective (reconversion)
+11
+0.0
+1
+
+SLIDER
+929
+839
+1156
+872
+reconvertion_company_rate
+reconvertion_company_rate
+0
+1
+0.01
+0.01
+1
+%
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

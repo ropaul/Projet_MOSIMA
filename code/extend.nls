@@ -115,3 +115,90 @@ to quit
   if (haveJob)[ ask employer [fire_employee me] ]
 
 end
+
+
+;; =================================================================
+;; FUNCTION FOR PERSPECTIVE (RECONVERSION)
+;; =================================================================
+
+
+to update_skill [a_person number_skills value]
+  ask a_person [ 
+    array:set skills number_skills (value)
+  ]
+end
+
+
+
+; is asking to a  COMPANY , he will may change his competences
+to reconversion_company 
+  foreach (n-values n_skills [?]) [
+    let skill (array:item skills ?)
+    let rand random-float 1
+    if (rand < reconvertion_company_rate) [
+      update_skill self ? (1 - skill)
+    ]
+  ]
+end 
+
+
+; is asking to a PERSONS or a COMPANY , he will may change his competences
+to reconversion_person 
+  foreach (n-values n_skills [?]) [
+    let skill (array:item skills ?)
+    let rand random-float 1
+    if (rand < reconvertion_person_rate) [
+      update_skill self ? (1 - skill)
+    ]
+  ]
+end 
+  
+
+
+
+;; =================================================================
+;; FUNCTION FOR PERSPECTIVE (MIMICRY)
+;; =================================================================
+
+
+
+;; is asking to a PERSONS , he will lean from his neighbors
+;to mimimcry 
+;  let me self
+;  let skill_of_me skills
+;  let x1 [xcor] of me
+;  let y1 [ycor] of me
+;    ask persons [
+;      let x2 [xcor] of self
+;      let y2 [ycor] of self
+;      if ( sqrt ((x1 - x2) ^ 2 + (y1 - y2) ^ 2) < distance_neighbors)[
+;        foreach (n-values n_skills [?]) [
+;          let skill_of_1 (array:item skill_of_me ?) 
+;          let skill_of_2 (array:item skills ?)
+;          if (skill_of_1 < skill_of_2)[
+;           update_skill me ? skill_of_2 
+;          ]
+;        ]
+;      ]
+;    ]
+;end
+
+;; is asking to a PERSONS , he will forget what he doesn't do
+;to forget
+;  let you employer
+;  let skill_of_you [skills] of you
+;  foreach (n-values skills [?]) [
+;    let skill_of_1 (array:item skill_of_you ?) 
+;    let skill_of_2 (array:item skills ?)
+;    if ( skill_of_2 = skill_of_1)[
+;      
+;    ]
+;  ]
+;end 
+
+
+
+
+
+
+

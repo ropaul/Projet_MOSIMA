@@ -51,8 +51,13 @@ to go_person
   ]
   [
     if (Activate_resignation_ = true) [
-      ifelse (Optimized_resignation_ = true)[optimezed_resign][resign] ; FOR THE RESIGANTION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ifelse (Optimized_resignation_ = true)[optimezed_resign][resign] ; for the resignation
     ]
+  ]
+  
+  
+   if (Activate_perspective = true) [ ; for the perspective
+    reconversion_person
   ]
   
 end
@@ -76,6 +81,11 @@ to go_company
       fire_employee(employee)
     ]
   ]
+  
+  if (Activate_perspective = true) [ ; for the perspective
+    reconversion_company
+  ]
+  
 end
 
 ; Dynamic simulation of a single agent matching. -----------------------------------------------------------------------
