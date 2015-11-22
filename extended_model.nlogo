@@ -413,7 +413,7 @@ CHOOSER
 sensibility_parameter_3_
 sensibility_parameter_3_
 "Number of persons" "Number of companies" "Exceptional matching" "Matching quality threshold" "Maximum productivity fluctuation" "Firing quality threshold" "Unexpected firing" "Salary maximum fluctuation" "Salary mean" "Unexpected company motivation" "Unexpeted worker motivation" "Number of different skills" "n_match" "unexpeted_resignation" "s" "reconvertion_person_rate" "NOTHING"
-13
+8
 
 INPUTBOX
 470
@@ -799,7 +799,7 @@ SWITCH
 784
 Activate_resignation
 Activate_resignation
-0
+1
 1
 -1000
 
@@ -851,7 +851,7 @@ SWITCH
 784
 Activate_perspective
 Activate_perspective
-0
+1
 1
 -1000
 

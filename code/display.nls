@@ -76,3 +76,8 @@ to-report best_fit [list1 list2]
 end 
   
   
+to moving_mean [list1]
+  if list1 != 0 and length list1 > 1 [
+   plot mean list1 
+  ]
+end    

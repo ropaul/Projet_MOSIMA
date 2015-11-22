@@ -228,7 +228,7 @@ n_match_
 n_match_
 0
 100
-100
+50
 1
 1
 NIL
@@ -431,7 +431,9 @@ true
 "" ""
 PENS
 "Unemployed rate" 1.0 0 -11783835 true "" "plot unemployement_rate"
+"Moving mean unemployed rate" 1.0 0 -8630108 true "" "moving_mean unemployement_rate_list"
 "Vacancy rate" 1.0 0 -2674135 true "" "plot vacancy_rate"
+"Moving mean vacancy rate" 1.0 0 -2139308 true "" "moving_mean vacancy_rate_list"
 
 SLIDER
 1092
@@ -457,7 +459,7 @@ long_time_unemployed
 long_time_unemployed
 0
 50
-10
+20
 1
 1
 NIL
@@ -468,7 +470,7 @@ PLOT
 555
 706
 746
-Hapinness
+Happiness
 NIL
 NIL
 0.0
