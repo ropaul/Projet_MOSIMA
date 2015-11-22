@@ -251,7 +251,7 @@ end
 to setup_globals  
  
   set salaryMax (salaryMean + salaryMaxFluctu)                                          ; The maximum salaray possible in the simulation
-  set distMax (world-width * world-width +  world-height *  world-height ) / 4          ; The maximum distance in this toric simulation
+  set distMax  ( sqrt ((world-width * world-width +  world-height *  world-height ) / 4)); The maximum distance in this toric simulation
   
   set labor_force (count persons with [not haveJob] + count persons with [haveJob])     ; The number of agents person having or looking for a job
   set unemployment_level count persons with [not haveJob]                               ; The number of unemployed agents person 

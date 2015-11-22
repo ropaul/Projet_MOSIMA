@@ -132,7 +132,7 @@ Person_Number_
 Person_Number_
 0
 500
-300
+70
 10
 1
 NIL
@@ -147,7 +147,7 @@ Compagny_Number_
 Compagny_Number_
 0
 500
-300
+70
 10
 1
 NIL
@@ -241,7 +241,7 @@ n_match_
 n_match_
 0
 100
-50
+100
 1
 1
 NIL
@@ -256,7 +256,7 @@ matching_quality_threshold_
 matching_quality_threshold_
 0
 1
-0.5
+0.4
 0.1
 1
 NIL
@@ -271,7 +271,7 @@ exceptional_matching_
 exceptional_matching_
 0
 1
-1
+0.5
 0.1
 1
 NIL
@@ -393,7 +393,7 @@ CHOOSER
 sensibility_parameter_1_
 sensibility_parameter_1_
 "Number of persons" "Number of companies" "Exceptional matching" "Matching quality threshold" "Maximum productivity fluctuation" "Firing quality threshold" "Unexpected firing" "Salary maximum fluctuation" "Salary mean" "Unexpected company motivation" "Unexpeted worker motivation" "Number of different skills" "NOTHING"
-1
+0
 
 CHOOSER
 274
@@ -403,7 +403,7 @@ CHOOSER
 sensibility_parameter_2_
 sensibility_parameter_2_
 "Number of persons" "Number of companies" "Exceptional matching" "Matching quality threshold" "Maximum productivity fluctuation" "Firing quality threshold" "Unexpected firing" "Salary maximum fluctuation" "Salary mean" "Unexpected company motivation" "Unexpeted worker motivation" "Number of different skills" "NOTHING"
-0
+1
 
 CHOOSER
 274
@@ -413,7 +413,7 @@ CHOOSER
 sensibility_parameter_3_
 sensibility_parameter_3_
 "Number of persons" "Number of companies" "Exceptional matching" "Matching quality threshold" "Maximum productivity fluctuation" "Firing quality threshold" "Unexpected firing" "Salary maximum fluctuation" "Salary mean" "Unexpected company motivation" "Unexpeted worker motivation" "Number of different skills" "n_match" "unexpeted_resignation" "s" "reconvertion_person_rate" "NOTHING"
-8
+16
 
 INPUTBOX
 470
@@ -432,7 +432,7 @@ INPUTBOX
 650
 562
 max_param_1_
-500
+100
 1
 0
 Number
@@ -465,7 +465,7 @@ INPUTBOX
 652
 632
 max_param_2_
-500
+100
 1
 0
 Number
@@ -753,7 +753,7 @@ SWITCH
 795
 Activate_optimized_matching
 Activate_optimized_matching
-1
+0
 1
 -1000
 
@@ -776,7 +776,7 @@ s
 s
 0
 100
-10
+13
 1
 1
 NIL
