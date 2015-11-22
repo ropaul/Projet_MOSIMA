@@ -36,7 +36,9 @@ to go
   go_simulation ; run the simulation
 end
 
-
+to-report stop_simulations?
+  report false
+end
 
 ; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) 
 to setup_sliders_globals
@@ -162,15 +164,13 @@ NIL
 0.0
 10.0
 0.0
-10.0
+1.0
 true
 true
 "" ""
 PENS
-"Unemployed people" 1.0 0 -13345367 true "" "plot count persons with [not haveJob]"
+"Unemployed people" 1.0 0 -13345367 true "" "unemployement"
 "Vacant job" 1.0 0 -2674135 true "" "vacancy"
-"Company waiting list" 1.0 0 -8053223 true "" "plot length [seekC] of matching matchingAgentWhoNumber"
-"Person waiting list" 1.0 0 -15390905 true "" "plot length [seekP] of matching matchingAgentWhoNumber"
 "Long time unemployed people" 1.0 0 -14333415 true "" "long_unemployement"
 "Long time Vacancy" 1.0 0 -6995700 true "" "long_vacancy"
 
@@ -243,7 +243,7 @@ matching_quality_threshold_
 matching_quality_threshold_
 0
 1
-0.7
+0.5
 0.1
 1
 NIL
@@ -303,7 +303,7 @@ unexpected_firing_
 unexpected_firing_
 0
 0.5
-0.2
+0.42
 0.01
 1
 NIL
@@ -318,7 +318,7 @@ firing_quality_threshold_
 firing_quality_threshold_
 0
 1
-0.2
+0.9
 0.1
 1
 NIL
@@ -333,7 +333,7 @@ max_productivity_fluctuation_
 max_productivity_fluctuation_
 0
 1
-0.4
+0.3
 0.1
 1
 NIL
@@ -462,6 +462,25 @@ long_time_unemployed
 1
 NIL
 HORIZONTAL
+
+PLOT
+264
+555
+706
+746
+Hapinness
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+true
+"" ""
+PENS
+"worker happiness" 1.0 0 -14333415 true "" "companies_happiness_plot"
+"companies happines" 1.0 0 -16050907 true "" "persons_happiness_plot"
 
 @#$#@#$#@
 ## WHAT IS IT?

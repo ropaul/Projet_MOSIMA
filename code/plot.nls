@@ -4,23 +4,35 @@
 
 ; show the long unemployement in one basic simulation
 to long_unemployement
-  if (Labor_force != 0 ) [ plot ((count persons with [ time_unemployed >= long_time_unemployed ] )  )]
+  ifelse (Labor_force != 0 ) [ plot ((count persons with [ time_unemployed >= long_time_unemployed ] ) / Labor_force )] [plot 0]
 end
 
 ; show the unemployement in one basic simulation
 to unemployement
-   plot count persons with [not haveJob]
+  ifelse (Labor_force != 0 ) [  plot (count persons with [not haveJob]) / Labor_force ] [ plot 0]
 end
 
 ; show the vacancy in one basic simulation  
 to vacancy
-  plot count companies with [not haveEmployee]
+  plot( (count companies with [not haveEmployee]) / count companies )
 end
 
 ; show the long vacancy in one basic simulation
 to long_vacancy
-  plot count companies with [time_unemployee >= long_time_unemployed]
+  plot ((count companies with [time_unemployee >= long_time_unemployed] )/ count companies )
 end
+
+
+
+to companies_happiness_plot
+  plot companies_happiness
+end
+
+
+to persons_happiness_plot
+  plot persons_happiness
+end
+
 
 ;; =================================================================
 ;; ANALYLIS PLOT PROCEDURES

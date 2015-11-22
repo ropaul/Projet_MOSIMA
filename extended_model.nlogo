@@ -40,7 +40,10 @@ to setup
   reset-ticks
 end
 
-
+to-report stop_simulations?
+  set stop_simulations stop_simulations_
+  report stop_simulations
+end
 
 
 ; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) (only for the base model)
@@ -238,7 +241,7 @@ n_match_
 n_match_
 0
 100
-100
+50
 1
 1
 NIL
@@ -253,7 +256,7 @@ matching_quality_threshold_
 matching_quality_threshold_
 0
 1
-0.7
+0.5
 0.1
 1
 NIL
@@ -268,7 +271,7 @@ exceptional_matching_
 exceptional_matching_
 0
 1
-0.1
+1
 0.1
 1
 NIL
@@ -313,7 +316,7 @@ unexpected_firing_
 unexpected_firing_
 0
 0.5
-0.2
+0.1
 0.01
 1
 NIL
@@ -403,14 +406,14 @@ sensibility_parameter_2_
 0
 
 CHOOSER
-277
+274
 651
-467
+464
 696
 sensibility_parameter_3_
 sensibility_parameter_3_
-"Number of persons" "Number of companies" "Exceptional matching" "Matching quality threshold" "Maximum productivity fluctuation" "Firing quality threshold" "Unexpected firing" "Salary maximum fluctuation" "Salary mean" "Unexpected company motivation" "Unexpeted worker motivation" "Number of different skills" "NOTHING"
-6
+"Number of persons" "Number of companies" "Exceptional matching" "Matching quality threshold" "Maximum productivity fluctuation" "Firing quality threshold" "Unexpected firing" "Salary maximum fluctuation" "Salary mean" "Unexpected company motivation" "Unexpeted worker motivation" "Number of different skills" "n_match" "unexpeted_resignation" "s" "reconvertion_person_rate" "NOTHING"
+13
 
 INPUTBOX
 470
@@ -484,7 +487,7 @@ INPUTBOX
 560
 700
 min_param_3_
-0
+0.1
 1
 0
 Number
@@ -495,7 +498,7 @@ INPUTBOX
 652
 701
 max_param_3_
-0.4
+0.9
 1
 0
 Number
@@ -506,7 +509,7 @@ INPUTBOX
 742
 701
 step_param_3_
-0.05
+0.2
 1
 0
 Number
@@ -796,7 +799,7 @@ SWITCH
 784
 Activate_resignation
 Activate_resignation
-1
+0
 1
 -1000
 
@@ -822,7 +825,7 @@ SWITCH
 866
 Optimized_resignation
 Optimized_resignation
-1
+0
 1
 -1000
 

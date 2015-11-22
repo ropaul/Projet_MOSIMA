@@ -273,7 +273,7 @@ to go_simulations
           while [ticks < n_ticks_max and not hasConverged_Vacancy_and_unemployement] [ ; The simulation will stop either if it has converged or run for too long
             
             go_simulation  
-            if stop_simulations [  
+            if (stop_simulations?) [  
               stop
             ]
           ]                                                          ; the simulation is stopped

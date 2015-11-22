@@ -39,6 +39,11 @@ to go
 end
 
 
+to-report stop_simulations?
+  
+  report false
+end
+
 
 ; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) 
 to setup_sliders_globals

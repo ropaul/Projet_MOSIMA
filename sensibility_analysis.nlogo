@@ -42,6 +42,11 @@ to setup
 end
 
 
+to-report stop_simulations?
+  set stop_simulations stop_simulations_
+  report stop_simulations
+end
+
 
 ; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) (only for the base model)
 to setup_sliders_globals
@@ -237,7 +242,7 @@ n_match_
 n_match_
 0
 100
-100
+10
 1
 1
 NIL
@@ -252,7 +257,7 @@ matching_quality_threshold_
 matching_quality_threshold_
 0
 1
-0.7
+0.5
 0.1
 1
 NIL
@@ -267,7 +272,7 @@ exceptional_matching_
 exceptional_matching_
 0
 1
-0.1
+1
 0.1
 1
 NIL
@@ -312,7 +317,7 @@ unexpected_firing_
 unexpected_firing_
 0
 0.5
-0.2
+0.1
 0.01
 1
 NIL
@@ -327,7 +332,7 @@ firing_quality_threshold_
 firing_quality_threshold_
 0
 1
-0.3
+0.5
 0.1
 1
 NIL
@@ -428,7 +433,7 @@ INPUTBOX
 650
 562
 max_param_1_
-500
+400
 1
 0
 Number
@@ -461,7 +466,7 @@ INPUTBOX
 652
 632
 max_param_2_
-500
+400
 1
 0
 Number
@@ -483,7 +488,7 @@ INPUTBOX
 560
 700
 min_param_3_
-0
+0.1
 1
 0
 Number
@@ -494,7 +499,7 @@ INPUTBOX
 652
 701
 max_param_3_
-0.4
+0.2
 1
 0
 Number
@@ -505,7 +510,7 @@ INPUTBOX
 742
 701
 step_param_3_
-0.05
+0.1
 1
 0
 Number
@@ -517,7 +522,7 @@ SWITCH
 481
 stop_simulations_
 stop_simulations_
-1
+0
 1
 -1000
 
@@ -586,9 +591,9 @@ Sensitivity analysis
 Unemployement rate
 Vacancy rate
 0.0
-1.0
+0.1
 0.0
-1.0
+0.1
 true
 true
 "" ""

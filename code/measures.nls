@@ -75,10 +75,14 @@ to-report persons_happiness
   let happiness 0
   let numberOfPerson 0 
   ask persons[
-    if (haveJob)[
+    ifelse (haveJob)[
       set happiness (happiness + similarity_person_to_company  self  employer )
       set numberOfPerson numberOfPerson + 1 
     ]
+    [
+      set numberOfPerson numberOfPerson + 1
+    ]
+      
   ]
   ifelse (numberOfPerson != 0) [
     set happiness happiness / numberOfPerson
@@ -91,16 +95,17 @@ to-report persons_happiness
 end
 
 
-to persons_happiness_plot
-  plot persons_happiness
-end
+
 
 to-report companies_happiness
   let happiness 0 
   let numberOfCompanies 0
   ask companies [
-    if (haveEmployee) [
+    ifelse (haveEmployee) [
       set happiness (happiness + similarity_company_to_person self employee)
+      set numberOfCompanies numberOfCompanies + 1
+    ]
+    [
       set numberOfCompanies numberOfCompanies + 1
     ]
   ]
@@ -113,10 +118,6 @@ to-report companies_happiness
   ]
 end
 
-
-to companies_happiness_plot
-  plot companies_happiness
-end
 
 
 
