@@ -1,4 +1,4 @@
-__includes[ "code/setup.nls" "code/go.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls" "code/plot.nls"] 
+__includes[ "code/setup.nls" "code/go.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls" "code/plot.nls" "code/extend.nls"] 
 
 to setup    
   clear-all  
@@ -14,8 +14,74 @@ to setup
      set long_unemployement_array_parameter []
      set happiness_worker_array_parameter []
      set happiness_companies_array_parameter []
+     
+     
+     
+    set Activate_optimized_matching_ false
+    set Activate_appendice_ false
+    set Activate_resignation_ false
+    set Optimized_resignation_ false
+    set Activate_perspective_ false
+    
+    
+    set weight_skill_person_ 0
+    set weight_distance_person_ 0
+    set weight_salary_person_ 0
+    
+    set weight_skill_companies_ 0
+    set weight_distance_companies_ 0
+    set weight_salary_companies_ 0
+    
+    set s_ 0 
+    
+    set  unexpected_resignation_ 0
+    set reconvertion_person_rate_ 0
+    set reconvertion_company_rate_ 0
     
   reset-ticks
+end
+
+
+
+; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) (only for the base model)
+to setup_sliders_globals
+  
+  set salaryMean salaryMean_                       
+  set salaryMaxFluctu salaryMaxFluctu_            
+  set n_skills n_skills_
+  set n_match n_match_ 
+  set matching_quality_threshold matching_quality_threshold_ 
+  set exceptional_matching exceptional_matching_ 
+  set unexpected_company_motivation unexpected_company_motivation_ 
+  set unexpected_worker_motivation unexpected_worker_motivation_ 
+  set unexpected_firing  unexpected_firing_ 
+  set firing_quality_threshold firing_quality_threshold_ 
+  set max_productivity_fluctuation max_productivity_fluctuation_  
+  set Person_Number Person_Number_
+  set Compagny_Number Compagny_Number_
+  set Rseed Rseed_
+  
+  set n_sub_simu n_sub_simu_
+  set time_window time_windows_
+  set n_ticks_max n_ticks_max_
+  set epsilon epsilon_
+  set stop_simulations stop_simulations_
+  
+  set sensibility_parameter_1 sensibility_parameter_1_           
+  set min_param_1 min List min_param_1_ max_param_1_                      
+  set max_param_1 max List min_param_1_ max_param_1_                     
+  set step_param_1 step_param_1_   
+  
+  set sensibility_parameter_2 sensibility_parameter_2_           
+  set min_param_2 min List min_param_2_ max_param_2_                      
+  set max_param_2 max List min_param_2_ max_param_2_                     
+  set step_param_2 step_param_2_    
+  
+  set sensibility_parameter_3 sensibility_parameter_3_           
+  set min_param_3 min List min_param_3_ max_param_3_                       
+  set max_param_3 max List min_param_3_ max_param_3_                     
+  set step_param_3 step_param_3_     
+ 
 end
 
 to go 
@@ -451,7 +517,7 @@ SWITCH
 481
 stop_simulations_
 stop_simulations_
-0
+1
 1
 -1000
 

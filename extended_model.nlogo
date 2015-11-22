@@ -22,8 +22,68 @@ to setup
     set Activate_perspective_ Activate_perspective
     
     
+    set weight_skill_person_ weight_skill_person
+    set weight_distance_person_ weight_distance_person
+    set weight_salary_person_ weight_salary_person
+    
+    set weight_skill_companies_ weight_skill_companies
+    set weight_distance_companies_ weight_distance_companies
+    set weight_salary_companies_ weight_salary_companies
+    
+    set s_ s 
+    
+    set  unexpected_resignation_ unexpected_resignation
+    set reconvertion_person_rate_ reconvertion_person_rate
+    set reconvertion_company_rate_ reconvertion_company_rate
+    
+    
   reset-ticks
 end
+
+
+
+
+; Report the sliders variables (XXXX_) to the simulation's variable (XXXX) (only for the base model)
+to setup_sliders_globals
+  
+  set salaryMean salaryMean_                       
+  set salaryMaxFluctu salaryMaxFluctu_            
+  set n_skills n_skills_
+  set n_match n_match_ 
+  set matching_quality_threshold matching_quality_threshold_ 
+  set exceptional_matching exceptional_matching_ 
+  set unexpected_company_motivation unexpected_company_motivation_ 
+  set unexpected_worker_motivation unexpected_worker_motivation_ 
+  set unexpected_firing  unexpected_firing_ 
+  set firing_quality_threshold firing_quality_threshold_ 
+  set max_productivity_fluctuation max_productivity_fluctuation_  
+  set Person_Number Person_Number_
+  set Compagny_Number Compagny_Number_
+  set Rseed Rseed_
+  
+  set n_sub_simu n_sub_simu_
+  set time_window time_windows_
+  set n_ticks_max n_ticks_max_
+  set epsilon epsilon_
+  set stop_simulations stop_simulations_
+  
+  set sensibility_parameter_1 sensibility_parameter_1_           
+  set min_param_1 min List min_param_1_ max_param_1_                      
+  set max_param_1 max List min_param_1_ max_param_1_                     
+  set step_param_1 step_param_1_   
+  
+  set sensibility_parameter_2 sensibility_parameter_2_           
+  set min_param_2 min List min_param_2_ max_param_2_                      
+  set max_param_2 max List min_param_2_ max_param_2_                     
+  set step_param_2 step_param_2_    
+  
+  set sensibility_parameter_3 sensibility_parameter_3_           
+  set min_param_3 min List min_param_3_ max_param_3_                       
+  set max_param_3 max List min_param_3_ max_param_3_                     
+  set step_param_3 step_param_3_     
+ 
+end
+
 
 to go 
   go_simulations                   ; run the simulations
@@ -767,10 +827,10 @@ Optimized_resignation
 -1000
 
 SLIDER
-927
-794
-1143
-827
+925
+792
+1153
+825
 reconvertion_person_rate
 reconvertion_person_rate
 0
@@ -784,7 +844,7 @@ HORIZONTAL
 SWITCH
 924
 751
-1097
+1154
 784
 Activate_perspective
 Activate_perspective
@@ -803,10 +863,10 @@ Perspective (reconversion)
 1
 
 SLIDER
-929
-839
-1156
-872
+927
+837
+1154
+870
 reconvertion_company_rate
 reconvertion_company_rate
 0
@@ -868,6 +928,16 @@ arrow
 true
 0
 Polygon -7500403 true true 150 0 0 150 105 150 105 293 195 293 195 150 300 150
+
+bite
+true
+0
+Circle -7500403 true true 51 -9 108
+Rectangle -7500403 false true 90 75 150 255
+Rectangle -7500403 true true 60 60 165 255
+Circle -7500403 true true -57 108 175
+Circle -7500403 true true 146 221 67
+Circle -7500403 true true 84 114 192
 
 box
 false

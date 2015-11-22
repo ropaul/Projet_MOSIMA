@@ -1,10 +1,33 @@
-__includes["code/go.nls"  "code/setup.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls" "code/plot.nls"] 
+__includes["code/go.nls"  "code/setup.nls" "code/measures.nls" "code/display.nls" "code/miscellaneaous.nls" "code/plot.nls" "code/plot.nls" "code/extend.nls"] 
 
 to setup    
   clear-all  
   
   setup_sliders_globals ; Use the slider's value in the graphical interface
   setup_simulation           ; Initialize the simulation variable
+  
+  
+  
+    set Activate_optimized_matching_ false
+    set Activate_appendice_ false
+    set Activate_resignation_ false
+    set Optimized_resignation_ false
+    set Activate_perspective_ false
+    
+    
+    set weight_skill_person_ 0
+    set weight_distance_person_ 0
+    set weight_salary_person_ 0
+    
+    set weight_skill_companies_ 0
+    set weight_distance_companies_ 0
+    set weight_salary_companies_ 0
+    
+    set s_ 0 
+    
+    set  unexpected_resignation_ 0
+    set reconvertion_person_rate_ 0
+    set reconvertion_company_rate_ 0
   
   reset-ticks
 end
@@ -408,9 +431,7 @@ true
 "" ""
 PENS
 "Unemployed rate" 1.0 0 -11783835 true "" "plot unemployement_rate"
-"Moving mean unemployed rate" 1.0 0 -8630108 true "" "moving_mean unemployement_rate_list"
 "Vacancy rate" 1.0 0 -2674135 true "" "plot vacancy_rate"
-"Moving mean vacancy rate" 1.0 0 -2139308 true "" "moving_mean vacancy_rate_list"
 
 SLIDER
 1092

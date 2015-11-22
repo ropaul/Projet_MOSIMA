@@ -56,7 +56,7 @@ to go_person
   ]
   
   
-   if (Activate_perspective = true) [ ; for the perspective
+   if (Activate_perspective_ = true) [ ; for the perspective
     reconversion_person
   ]
   
@@ -82,7 +82,7 @@ to go_company
     ]
   ]
   
-  if (Activate_perspective = true) [ ; for the perspective
+  if (Activate_perspective_ = true) [ ; for the perspective
     reconversion_company
   ]
   
@@ -121,7 +121,7 @@ to go_matching
     let simi_person 0
     let simi_company 0
     ; HERE IF WE USE OPTIMIZED MATCHING
-    ifelse (Activate_optimized_matching = true)[
+    ifelse (Activate_optimized_matching_ = true)[
       set simi_person (optimized_similarity_person_to_company a_person a_company)  ; The similarity between an agent person and an agent company is computed
       set simi_company (optimized_similarity_company_to_person a_company a_person) ; as well as between a company and a person 
     ]
@@ -273,7 +273,7 @@ to go_simulations
           while [ticks < n_ticks_max and not hasConverged_Vacancy_and_unemployement] [ ; The simulation will stop either if it has converged or run for too long
             
             go_simulation  
-            if stop_simulations_ [  
+            if stop_simulations [  
               stop
             ]
           ]                                                          ; the simulation is stopped
