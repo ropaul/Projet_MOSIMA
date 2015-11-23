@@ -413,7 +413,7 @@ CHOOSER
 sensibility_parameter_3_
 sensibility_parameter_3_
 "Number of persons" "Number of companies" "Exceptional matching" "Matching quality threshold" "Maximum productivity fluctuation" "Firing quality threshold" "Unexpected firing" "Salary maximum fluctuation" "Salary mean" "Unexpected company motivation" "Unexpeted worker motivation" "Number of different skills" "n_match" "unexpeted_resignation" "s" "reconvertion_person_rate" "NOTHING"
-16
+14
 
 INPUTBOX
 470
@@ -432,7 +432,7 @@ INPUTBOX
 650
 562
 max_param_1_
-100
+400
 1
 0
 Number
@@ -465,7 +465,7 @@ INPUTBOX
 652
 632
 max_param_2_
-100
+400
 1
 0
 Number
@@ -487,7 +487,7 @@ INPUTBOX
 560
 700
 min_param_3_
-0.1
+0
 1
 0
 Number
@@ -498,7 +498,7 @@ INPUTBOX
 652
 701
 max_param_3_
-0.9
+1
 1
 0
 Number
@@ -620,7 +620,7 @@ PLOT
 677
 measures
 Param 3
-%
+Proportion
 0.0
 0.1
 0.0
@@ -676,7 +676,7 @@ SWITCH
 784
 Activate_appendice
 Activate_appendice
-1
+0
 1
 -1000
 
@@ -753,7 +753,7 @@ SWITCH
 795
 Activate_optimized_matching
 Activate_optimized_matching
-0
+1
 1
 -1000
 
@@ -775,9 +775,9 @@ SLIDER
 s
 s
 0
-100
-13
 1
+0.5
+0.1
 1
 NIL
 HORIZONTAL
@@ -879,6 +879,17 @@ reconvertion_company_rate
 1
 %
 HORIZONTAL
+
+MONITOR
+523
+847
+580
+892
+NIL
+M
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

@@ -46,7 +46,6 @@ to go_person
         ] 
       ] 
     ]
-    
     set time_unemployed time_unemployed + 1    ; At each tick we keep track of the time the agent person was unemployed
   ]
   [

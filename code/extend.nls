@@ -76,11 +76,13 @@ end
   
 to-report M_value
   go_globals
-  ifelse (Vacancy_rate != 0)[
-    set M vacancy_rate * (1 - e ^ (- 1 * s_ * Unemployement_rate / Vacancy_rate))
+  set vacant_jobs count companies with [not haveEmployee] 
+  let U count persons with [not haveJob]  
+  ifelse (vacant_jobs  != 0)[
+    set M   vacant_jobs  * (1 - e ^ (- 1 * s_ * U / vacant_jobs ))
   ]
   [
-    set M 0
+    set M 10
   ]
   report M
 end
