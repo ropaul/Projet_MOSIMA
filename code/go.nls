@@ -213,7 +213,6 @@ to go_simulations
     if length range_param_3 > 0 [      
       set value_param_3 (item ? range_param_3)
     ]
-    show range_param_3
     
     set UnemployedRateList_simulations []                               ; New lists are used to store results with each value of the third parameter
     set UnemployedRateList_simulations []
